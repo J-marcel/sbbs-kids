@@ -2,18 +2,19 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class RoleSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
+        // Vérifier si les rôles existent déjà pour éviter les doublons
+        if (DB::table('roles')->count() > 0) {
+            return;
+        }
+
         $roles = [
             ['name' => 'Admin'],
             ['name' => 'Trainer'],

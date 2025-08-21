@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\User;
 use App\Models\Admin;
@@ -10,19 +9,21 @@ use Illuminate\Support\Facades\Hash;
 
 class AdminSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
+        // Vérifier si l'admin existe déjà
+        if (User::where('email', 'admin@example.com')->exists()) {
+            return;
+        }
+
         // Créer l'utilisateur associé
         $user = User::create([
             'name' => 'Admin Principal',
-            'email' => 'admin @example.com',
+            'email' => 'admin@example.com', // Corrigé: suppression de l'espace
             'phone_number' => '0700000000',
             'number_whatsapp' => '0700000000',
             'role_id' => 1, // ID du rôle admin
-            'password' => Hash::make('password123'), // Mot de passe par défaut
+            'password' => Hash::make('password123'),
             'is_otp_verified' => true,
             'email_verified_at' => now(),
             'otp' => null,
@@ -37,7 +38,6 @@ class AdminSeeder extends Seeder
             'gender' => 'male',
             'phone_number' => '0700000000',
             'number_whatsapp' => '0700000000',
-
         ]);
     }
 }
