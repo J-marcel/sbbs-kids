@@ -11,23 +11,17 @@ class Student extends Model
 
     protected $fillable = [
         'name',
-        'user_id',
-        'email',
+        'parent_model_id',
         'phone_number',
         'number_whatsapp',
         'gender',
         'age_group',
-        'parent_model_id',
+        'pin_code',
 
     ];
 
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
-
     public function parent()
     {
-        return $this->belongsTo(ParentModel::class, 'parent_model_id', 'id');
+        return $this->belongsTo(ParentModel::class);
     }
 }

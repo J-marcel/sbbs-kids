@@ -107,20 +107,6 @@ class User extends Authenticatable
         return false;
     }
 
-    public function loginLogs()
-    {
-        return $this->hasMany(LoginLog::class);
-    }
-
-    public function products()
-    {
-        return $this->hasMany(Product::class);
-    }
-
-    public function comments()
-    {
-        return $this->hasMany(Comment::class);
-    }
 
     public function role()
     {
@@ -132,9 +118,13 @@ class User extends Authenticatable
         return $this->hasOne(Student::class);
     }
 
-    public function parent()
+    public function parents()
     {
-        return $this->hasOne(ParentModel::class);
+        return $this->hasMany(ParentModel::class);
+    }
+    public function studentParent()
+    {
+        return $this->hasOne(ParentModel::class)->where('is_main', true);
     }
 
     public function admin()

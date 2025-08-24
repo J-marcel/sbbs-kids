@@ -10,11 +10,12 @@ class ParentModel extends Model
 
     protected $fillable = [
         'name',
-        'email',
+        'user_id',
         'gender',
         'phone_number',
         'number_whatsapp',
-        'user_id',
+        'is_main',
+        'is_child',
     ];
 
     public function user()
@@ -24,6 +25,6 @@ class ParentModel extends Model
 
     public function student()
     {
-        return $this->hasMany(Student::class);
+        return $this->hasOne(Student::class);
     }
 }

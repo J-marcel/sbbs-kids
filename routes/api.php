@@ -98,9 +98,9 @@ Route::middleware('auth:sanctum')->group(function () {
     ->group(function () {
         Route::controller(ParentController::class)->group(function () {
             Route::get('/parents', 'index');
-            Route::post('/parents', 'store');
-            Route::get('/parents/{parentModel}', 'show');
-            Route::put('/parents/{parentModel}', 'update');
+            Route::post('/parents-student', 'storeStudent');
+            Route::post('/profiles/{profile}/switch', [ParentController::class, 'switchProfile']);
+            Route::put('/parents-student/{parentModel}', 'update');
             Route::delete('/parents/{parentModel}', 'destroy');
             Route::patch('/parents/status/{parentModel}', 'status');
         });

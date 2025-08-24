@@ -1,12 +1,17 @@
 <?php
+
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\StoreLoginRequest;
+use App\Mail\NewLoginNotification;
 use App\Services\OtpService;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
+use Jenssegers\Agent\Facades\Agent;
 
 class LoginController extends Controller
 {
@@ -21,7 +26,21 @@ class LoginController extends Controller
     {
         $validated = $request->validated();
 
-        $user = User::where('email', $validated['email'])->first();
+        // Support des deux formats : 'login' (nouveau) ou 'email' (ancien)
+        $loginField = $validated['login'] ?? $validated['email'] ?? null;
+
+        if (!$loginField) {
+            return response()->json([
+                'message' => 'Email ou numéro de téléphone requis.',
+                'status' => 400,
+            ], 400);
+        }
+
+        // Rechercher l'utilisateur par email ou numéro de téléphone
+        $user = User::where(function($query) use ($loginField) {
+            $query->where('email', $loginField)
+                  ->orWhere('phone_number', $loginField);
+        })->first();
 
         if (!$user || !Hash::check($validated['password'], $user->password)) {
             return response()->json([
@@ -62,7 +81,40 @@ class LoginController extends Controller
             ], 200);
         }
 
-        // Connexion réussie - code existant pour la notification...
+        // Obtenir l’adresse IP de l’utilisateur
+        $ipAddress = request()->ip();
+
+        // Tenter d’obtenir la localisation via IP
+        $location = 'Localisation indisponible';
+        try {
+            $response = Http::get("http://ip-api.com/json/{$ipAddress}?fields=country,regionName,city");
+            if ($response->successful()) {
+                $data     = $response->json();
+                $location = "{$data['city']}, {$data['regionName']}, {$data['country']}";
+            }
+        } catch (\Exception $e) {
+            // Logging optionnel si besoin
+        }
+
+        $userAgent = request()->header('User-Agent');
+
+        // Information basique (chaîne brute)
+        $deviceInfo = $userAgent;
+
+        // OU utiliser un package pour une meilleure détection
+        $agent      = new Agent();
+        $deviceInfo = [
+            'plateforme' => Agent::platform(), // Notez l'appel statique
+            'navigateur' => Agent::browser(),
+            'version'    => Agent::version(Agent::browser()),
+            'appareil'   => Agent::isTablet() ? 'Tablette' : (Agent::isMobile() ? 'Mobile' : 'Ordinateur'),
+            'robot'      => Agent::isRobot() ? Agent::robot() : false,
+            'userAgent'  => $userAgent,
+        ];
+
+
+        // Connexion réussie
+        Mail::to($user->email)->send(new NewLoginNotification($user, $ipAddress, $location, $deviceInfo));
         $token = $user->createToken('token')->plainTextToken;
 
         return response()->json([

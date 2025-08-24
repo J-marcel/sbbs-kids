@@ -16,10 +16,12 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->string('name');
-            $table->string('email');
             $table->enum('gender', ['male', 'female'])->default('male');
+            $table->string('avatar')->nullable();
             $table->string('phone_number')->nullable();
             $table->string('number_whatsapp')->nullable();
+            $table->boolean('is_main')->default(false);
+            $table->boolean('is_child')->default(false);
             $table->timestamps();
         });
     }

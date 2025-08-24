@@ -36,17 +36,15 @@ class RegisterController extends Controller
             'password' => Hash::make($validated['password']),
         ]);
 
-        $parent = ParentModel::create([
+
+        $user->parents()->create([
             'name' => $validated['name'],
-            'email' => $validated['email'],
             'gender' => $validated['gender'],
             'phone_number' => $validated['phone_number'],
             'number_whatsapp' => $validated['number_whatsapp'],
             'user_id' => $user->id,
+            'is_main' => true,
         ]);
-
-        $parent->user()->associate($user);
-        $parent->save();
 
         // Envoyer OTP par tous les canaux disponibles
         $results = $this->otpService->sendOtpMultiChannel($user);
@@ -68,7 +66,6 @@ class RegisterController extends Controller
         return response()->json([
             'message' => 'Votre compte a été créé avec succès. Codes OTP envoyés via : ' . implode(', ', $channels),
             'user' => $user,
-            'parent' => $parent,
             'delivery_status' => $results,
             'status' => '200'
         ], 200);
