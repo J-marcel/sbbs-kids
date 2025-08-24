@@ -70,7 +70,7 @@
         <!-- Logo -->
         <div class="logo">
             {{-- <img src="{{ url('storage/images/artisan_logo.jpg') }}" alt="Logo {{ config('app.name') }}" style="max-width: 200px; height: auto;"> --}}
-            <img src="{{ asset('assets/images/artisan_logo.jpg') }}" alt="Logo {{ config('app.name') }}" style="max-width: 200px; height: auto;">
+            <img src="{{ asset('assets/images/logo.png') }}" alt="Logo {{ config('app.name') }}" style="max-width: 200px; height: auto;">
         </div>
 
         <h1>Bonjour {{ $user->name }},</h1>

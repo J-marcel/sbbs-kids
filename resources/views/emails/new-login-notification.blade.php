@@ -67,7 +67,7 @@
 
         <!-- Logo -->
         <div class="logo">
-            <img src="{{ asset('assets/images/dealxpress.png') }}" alt="Logo {{ config('app.name') }}">
+            <img src="{{ asset('assets/images/logo.png') }}" alt="Logo {{ config('app.name') }}">
         </div>
 
         <h1>Bonjour {{ $user->name }},</h1>

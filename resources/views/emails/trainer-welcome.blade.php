@@ -76,7 +76,8 @@
 <body>
     <div class="container">
         <div class="header">
-            <div class="logo">🎓 {{ config('app.name') }}</div>
+            <div class="logo">🎓<img src="{{ asset('assets/images/logo.png') }}" alt="Logo {{ config('app.name') }}" style="max-width: 200px; height: auto;">
+            </div>
             <h1 style="color: #007bff;">Bienvenue {{ $trainer->name }} !</h1>
         </div>
 
