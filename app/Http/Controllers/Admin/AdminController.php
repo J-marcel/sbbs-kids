@@ -73,7 +73,6 @@ class AdminController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'gender' => $validated['gender'],
-            'age_group' => $validated['age_group'],
             'phone_number' => $validated['phone_number'],
             'number_whatsapp' => $validated['number_whatsapp'],
             'user_id' => $user->id, // Ajoutez cette ligne
@@ -98,9 +97,7 @@ class AdminController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Admin $admin) {
-
-    }
+    public function show(Admin $admin) {}
 
     /**
      * Update the specified resource in storage.
@@ -108,33 +105,107 @@ class AdminController extends Controller
     public function update(UpdateAdminRequest $request, Admin $admin)
     {
         $validated = $request->validated();
+
         DB::beginTransaction();
+        try {
 
-        $admin->update($validated);
+            $userUpdateData = [];
+            $adminUpdateData = [];
 
-        DB::commit();
 
-        return response()->json([
-            'message' => 'Admin mis à jour avec succès',
-            'admin' => $admin,
-            'status'  => 200,
-        ], 200);
+            $userFields = ['name', 'phone_number', 'number_whatsapp'];
+            $adminFields = ['name', 'gender', 'phone_number', 'number_whatsapp'];
+
+            foreach ($validated as $key => $value) {
+                if (in_array($key, $userFields)) {
+                    $userUpdateData[$key] = $value;
+                }
+                if (in_array($key, $adminFields)) {
+                    $adminUpdateData[$key] = $value;
+                }
+            }
+
+            if (!empty($userUpdateData) && $admin->user_id) {
+                $user = User::find($admin->user_id);
+                if ($user) {
+                    $user->update($userUpdateData);
+                }
+            }
+
+            if (!empty($adminUpdateData)) {
+                $admin->update($adminUpdateData);
+            }
+
+            DB::commit();
+
+            $admin->load('user');
+
+            return response()->json([
+                'message' => 'Admin mis à jour avec succès',
+                'admin' => $admin,
+                'status'  => 200,
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'message' => 'Erreur lors de la mise à jour',
+                'error' => $e->getMessage(),
+                'status'  => 500,
+            ], 500);
+        }
     }
-
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(Admin $admin)
     {
+        // Vérifier si c'est l'admin avec ID 1 (protection)
+        if ($admin->id == 1) {
+            return response()->json([
+                'message' => 'Impossible de supprimer cet administrateur',
+                'status'  => 403,
+            ], 403);
+        }
+
+        // Vérifier si l'utilisateur associé a l'ID 1 (protection)
+        if ($admin->user_id == 1) {
+            return response()->json([
+                'message' => 'Impossible de supprimer cet administrateur',
+                'status'  => 403,
+            ], 403);
+        }
+
         DB::beginTransaction();
 
-        $admin->delete();
+        try {
+            // Supprimer l'utilisateur associé si nécessaire
+            if ($admin->user_id) {
+                $user = User::find($admin->user_id);
+                if ($user) {
+                    $user->delete();
+                }
+            }
 
-        DB::commit();
+            // Supprimer l'admin
+            $admin->delete();
 
-        return response()->json([
-            'message' => 'Admin supprimé avec succès',
-            'status'  => 200,
-        ], 200);
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Admin supprimé avec succès',
+                'status'  => 200,
+            ], 200);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'message' => 'Erreur lors de la suppression',
+                'error' => $e->getMessage(),
+                'status'  => 500,
+            ], 500);
+        }
     }
 }
+

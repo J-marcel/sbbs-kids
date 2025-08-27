@@ -16,16 +16,16 @@ class TrainerWelcomeMail extends Mailable
 
     public $trainer;
     public $user;
-    public $resetUrl;
+    public $password;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(Trainer $trainer, User $user, string $resetUrl)
+    public function __construct(Trainer $trainer, User $user, string $password)
     {
         $this->trainer = $trainer;
         $this->user = $user;
-        $this->resetUrl = $resetUrl;
+        $this->password = $password;
     }
 
     /**

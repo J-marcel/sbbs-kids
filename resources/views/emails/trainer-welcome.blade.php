@@ -43,18 +43,32 @@
             border-radius: 5px;
             margin: 20px 0;
         }
-        .button {
-            display: inline-block;
-            padding: 12px 30px;
-            background-color: #007bff;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
+        .password-box {
+            background-color: #fff3cd;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #ffc107;
             margin: 20px 0;
             text-align: center;
         }
-        .button:hover {
-            background-color: #0056b3;
+        .password-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            letter-spacing: 2px;
+            font-family: 'Courier New', monospace;
+            border: 2px dashed #007bff;
+        }
+        .security-warning {
+            background-color: #f8d7da;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #dc3545;
+            margin: 20px 0;
         }
         .info-section {
             margin: 20px 0;
@@ -87,41 +101,41 @@
         </div>
 
         <div class="info-section">
-            <h3>📋 Informations de votre compte :</h3>
-            <div class="credentials-box">
-                <p><strong>Nom :</strong> {{ $trainer->name }}</p>
-                <p><strong>Email :</strong> {{ $user->email }}</p>
-                <p><strong>Téléphone :</strong> {{ $trainer->phone_number }}</p>
-                @if($trainer->number_whatsapp)
-                    <p><strong>WhatsApp :</strong> {{ $trainer->number_whatsapp }}</p>
-                @endif
-                <p><strong>Genre :</strong> {{ $trainer->gender }}</p>
+            <h3>🔐 Vos identifiants de connexion</h3>
+            <div class="password-box">
+                <h4>Votre mot de passe temporaire :</h4>
+                <div class="password-value">{{ $password }}</div>
+                <p style="font-size: 14px; margin-top: 15px;">
+                    <strong>⚠️ Important :</strong> Copiez ce mot de passe et conservez-le en lieu sûr.
+                </p>
             </div>
         </div>
 
-        <div class="info-section">
-            <h3>🔐 Configuration de votre mot de passe</h3>
-            <p>Pour sécuriser votre compte, vous devez définir votre propre mot de passe. Cliquez sur le bouton ci-dessous pour créer votre mot de passe personnalisé :</p>
-
-            <div style="text-align: center;">
-                <a href="{{ $resetUrl }}" class="button">
-                    🔑 Définir mon mot de passe
-                </a>
-            </div>
-
-            <p style="font-size: 14px; color: #666;">
-                <strong>Note :</strong> Ce lien est valide pendant 60 minutes. Si le lien expire, vous pourrez demander un nouveau lien de réinitialisation depuis la page de connexion.
-            </p>
+        <div class="security-warning">
+            <h3>🔒 Sécurité importante</h3>
+            <ul style="margin: 10px 0; text-align: left;">
+                <li><strong>Changez votre mot de passe</strong> dès votre première connexion</li>
+                <li><strong>Ne partagez jamais</strong> vos identifiants de connexion</li>
+                <li><strong>Supprimez cet email</strong> après avoir noté votre mot de passe</li>
+                <li><strong>Utilisez un mot de passe fort</strong> lors du changement</li>
+            </ul>
         </div>
 
         <div class="info-section">
             <h3>📚 Prochaines étapes</h3>
             <ol>
-                <li>Cliquez sur le lien ci-dessus pour définir votre mot de passe</li>
-                <li>Connectez-vous à votre espace formateur</li>
+                <li>Connectez-vous avec votre email et le mot de passe ci-dessus</li>
+                <li><strong>Changez immédiatement votre mot de passe</strong> dans votre profil</li>
                 <li>Complétez votre profil si nécessaire</li>
                 <li>Explorez les fonctionnalités disponibles</li>
             </ol>
+        </div>
+
+        <div class="info-section" style="background-color: #d1ecf1; padding: 15px; border-radius: 5px; border-left: 4px solid #17a2b8;">
+            <h3>🌐 Comment se connecter</h3>
+            {{-- <p><strong>URL de connexion :</strong> <a href="{{ config('app.frontend_url') }}/login" target="_blank">{{ config('app.frontend_url') }}/login</a></p> --}}
+            <p><strong>Email :</strong> {{ $user->email }}</p>
+            <p><strong>Mot de passe :</strong> Celui indiqué ci-dessus</p>
         </div>
 
         <div class="info-section" style="background-color: #fff3cd; padding: 15px; border-radius: 5px; border-left: 4px solid #ffc107;">
@@ -134,6 +148,7 @@
         </div>
 
         <div class="footer">
+            <p><strong>⚠️ Cet email contient des informations sensibles. Supprimez-le après avoir noté vos identifiants.</strong></p>
             <p>Cet email a été envoyé automatiquement, merci de ne pas y répondre.</p>
             <p>&copy; {{ date('Y') }} {{ config('app.name') }}. Tous droits réservés.</p>
         </div>

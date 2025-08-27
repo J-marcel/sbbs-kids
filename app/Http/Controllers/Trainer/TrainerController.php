@@ -36,7 +36,7 @@ class TrainerController extends Controller
         $verifEmail = User::where('email', $request->email)->first();
         if ($verifEmail) {
             return response()->json([
-                'message' => 'Email deja utilisé',
+                'message' => 'Email deja utilisé',
                 'status'  => 400,
             ], 400);
         }
@@ -55,7 +55,7 @@ class TrainerController extends Controller
             ], 403);
         }
 
-        // Créer l'utilisateur (avec un mot de passe aléatoire ou autre)
+        // Créer l'utilisateur (avec un mot de passe aléatoire)
         $randomPassword = str()->random(8);
         $user = User::create([
             'name' => $validated['name'],
@@ -77,7 +77,7 @@ class TrainerController extends Controller
             'gender' => $validated['gender'],
             'phone_number' => $validated['phone_number'],
             'number_whatsapp' => $validated['number_whatsapp'],
-            'user_id' => $user->id, // Ajoutez cette ligne
+            'user_id' => $user->id,
             'admin_id' => $verifAdmin->id,
         ];
 
@@ -89,8 +89,9 @@ class TrainerController extends Controller
 
         DB::commit();
 
+        // Envoyer l'email avec le mot de passe généré
         $trainerWelcomeService = app(TrainerWelcomeService::class);
-        $trainerWelcomeService->sendWelcomeEmail($trainer, $user);
+        $trainerWelcomeService->sendWelcomeEmail($trainer, $user, $randomPassword);
 
         return response()->json([
             'message' => 'Enseignant créé avec succès',
@@ -114,16 +115,49 @@ class TrainerController extends Controller
     {
         $validated = $request->validated();
         DB::beginTransaction();
+        try {
+            $userUpdateData = [];
+            $trainerUpdateData = [];
 
-        $trainer->update($validated);
+            $userFields = ['name', 'phone_number', 'number_whatsapp'];
+            $trainerFields = ['name', 'gender', 'phone_number', 'number_whatsapp'];
 
-        DB::commit();
+            foreach ($validated as $key => $value) {
+                if (in_array($key, $userFields)) {
+                    $userUpdateData[$key] = $value;
+                }
+                if (in_array($key, $trainerFields)) {
+                    $trainerUpdateData[$key] = $value;
+                }
+            }
 
-        return response()->json([
-            'message' => 'Enseignant mis à jour avec succès',
-            'trainer' => $trainer,
-            'status'  => 200,
-        ], 200);
+            if (!empty($userUpdateData) && $trainer->user_id) {
+                $user = User::find($trainer->user_id);
+                if ($user) {
+                    $user->update($userUpdateData);
+                }
+            }
+
+            if (!empty($trainerUpdateData)) {
+                $trainer->update($trainerUpdateData);
+            }
+
+            DB::commit();
+
+            $trainer->load('user');
+
+            return response()->json([
+                'message' => 'Enseignant mis à jour avec succès',
+                'trainer' => $trainer,
+                'status'  => 200,
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Erreur lors de la mise à jour de l\'enseignant',
+                'status'  => 500,
+            ], 500);
+        }
     }
 
     /**
@@ -132,14 +166,25 @@ class TrainerController extends Controller
     public function destroy(Trainer $trainer)
     {
         DB::beginTransaction();
-
-        $trainer->delete();
-
-        DB::commit();
-
-        return response()->json([
-            'message' => 'Enseignant supprimé avec succès',
-            'status'  => 200,
-        ], 200);
+        try {
+            if ($trainer->user_id) {
+                $user = User::find($trainer->user_id);
+                if ($user) {
+                    $user->delete();
+                }
+            }
+            $trainer->delete();
+            DB::commit();
+            return response()->json([
+                'message' => 'Enseignant supprimé avec succès',
+                'status'  => 200,
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Erreur lors de la suppression de l\'enseignant',
+                'status'  => 500,
+            ], 500);
+        }
     }
 }

@@ -23,7 +23,6 @@ class UpdateAdminRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|lowercase',
             'gender' => 'required|in:male,female',
             'phone_number' => 'nullable|string|max:255',
             'number_whatsapp' => 'nullable|string|max:255',
@@ -33,9 +32,6 @@ class UpdateAdminRequest extends FormRequest
     public function messages(){
         return [
             'name.required' => 'Le nom est obligatoire.',
-            'email.required' => 'L\'email est obligatoire.',
-            'email.email' => 'L\'email doit être une adresse email valide.',
-            'email.lowercase' => 'L\'email doit être en minuscules.',
             'gender.required' => 'Le genre est obligatoire.',
             'gender.in' => 'Le genre doit être "male" ou "female".',
             'phone_number.string' => 'Le numéro de téléphone doit être une chaîne de caractères.',

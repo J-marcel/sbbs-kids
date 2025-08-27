@@ -4,34 +4,26 @@ namespace App\Services;
 
 use App\Models\User;
 use App\Models\Trainer;
-use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\TrainerWelcomeMail;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Hash;
 
 class TrainerWelcomeService
 {
     /**
-     * Envoie un email de bienvenue avec le lien de réinitialisation de mot de passe
+     * Envoie un email de bienvenue avec le mot de passe généré
      *
      * @param Trainer $trainer
      * @param User $user
+     * @param string $password
      * @return bool
      */
-    public function sendWelcomeEmail(Trainer $trainer, User $user): bool
+    public function sendWelcomeEmail(Trainer $trainer, User $user, string $password): bool
     {
         try {
-            // Générer le token de réinitialisation de mot de passe
-            $token = Password::createToken($user);
-
-            // Générer le lien de réinitialisation
-            $resetUrl = config('app.frontend_url') . '/forgot-password?token=' . $token . '&email=' . urlencode($user->email);
-
-            // Alternativement, si vous utilisez les routes Laravel :
-            // $resetUrl = url(route('password.reset', ['token' => $token, 'email' => $user->email], false));
-
-            // Envoyer l'email
-            Mail::to($user->email)->send(new TrainerWelcomeMail($trainer, $user, $resetUrl));
+            // Envoyer l'email avec le mot de passe
+            Mail::to($user->email)->send(new TrainerWelcomeMail($trainer, $user, $password));
 
             Log::info("Email de bienvenue envoyé avec succès à {$user->email}");
 
@@ -45,6 +37,8 @@ class TrainerWelcomeService
 
     /**
      * Envoie un email de bienvenue en utilisant seulement l'ID du formateur
+     * Note: Cette méthode ne peut pas générer un nouveau mot de passe
+     * car elle ne connaît pas le mot de passe original
      *
      * @param int $trainerId
      * @return bool
@@ -53,7 +47,16 @@ class TrainerWelcomeService
     {
         try {
             $trainer = Trainer::with('user')->findOrFail($trainerId);
-            return $this->sendWelcomeEmail($trainer, $trainer->user);
+
+            // Générer un nouveau mot de passe temporaire
+            $newPassword = str()->random(8);
+
+            // Mettre à jour le mot de passe de l'utilisateur
+            $trainer->user->update([
+                'password' => Hash::make($newPassword)
+            ]);
+
+            return $this->sendWelcomeEmail($trainer, $trainer->user, $newPassword);
         } catch (\Exception $e) {
             Log::error("Erreur lors de l'envoi de l'email pour le formateur ID {$trainerId}: " . $e->getMessage());
             return false;
