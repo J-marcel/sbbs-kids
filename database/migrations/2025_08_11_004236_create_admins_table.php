@@ -15,6 +15,7 @@ return new class extends Migration
         Schema::create('admins', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
+            $table->string('avatar')->nullable();
             $table->string('name');
             $table->string('email');
             $table->enum('gender', ['male', 'female'])->default('male');

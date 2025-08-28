@@ -2,26 +2,47 @@
 
 namespace App\Models;
 
+use App\Helpers\ImageHelpers;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Hash;
 
 class Student extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'name',
         'parent_model_id',
-        'phone_number',
-        'number_whatsapp',
+        'name',
+        'avatar',
         'gender',
         'age_group',
+        'phone_number',
+        'number_whatsapp',
         'pin_code',
 
     ];
 
-    public function parent()
+    protected $appends = [
+        'avatar_url',
+    ];
+
+    public function getAvatarUrlAttribute(): string | null
     {
-        return $this->belongsTo(ParentModel::class);
+        return ImageHelpers::pathToUrl($this->avatar);
+    }
+    protected $hidden = [
+        'pin_code',
+    ];
+
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(ParentModel::class, 'parent_model_id');
+    }
+
+    public function checkPin($pin)
+    {
+        return Hash::check($pin, $this->pin_code);
     }
 }

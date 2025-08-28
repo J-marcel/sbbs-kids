@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Admin::class)->constrained()->cascadeOnDelete();
+            $table->string('avatar')->nullable();
             $table->string('name');
             $table->string('email');
             $table->enum('gender', ['male', 'female'])->default('male');

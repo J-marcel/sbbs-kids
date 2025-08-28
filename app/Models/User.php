@@ -36,10 +36,10 @@ class User extends Authenticatable
     ];
 
     protected $appends = [
-        'image_url',
+        'avatar_url',
     ];
 
-    public function getImageUrlAttribute(): string | null
+    public function getAvatarUrlAttribute(): string | null
     {
         return ImageHelpers::pathToUrl($this->avatar);
     }

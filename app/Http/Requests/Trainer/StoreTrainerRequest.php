@@ -23,6 +23,7 @@ class StoreTrainerRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
+            'avatar' => 'nullable|file|mimes:jpeg,png,jpg|max:2048',
             'email' => 'required|email|max:255|lowercase',
             'gender' => 'required|in:male,female',
             'phone_number' => 'nullable|string|max:255',
@@ -34,6 +35,9 @@ class StoreTrainerRequest extends FormRequest
     {
         return [
             'name.required' => 'Le nom est obligatoire.',
+            'avatar.file' => 'L\'avatar doit être un fichier.',
+            'avatar.mimes' => 'L\'avatar doit être un fichier de type jpeg, png ou jpg.',
+            'avatar.max' => 'La taille de l\'avatar ne doit pas dépasser 2 Mo.',
             'email.required' => 'L\'email est obligatoire.',
             'email.email' => 'L\'email doit être une adresse email valide.',
             'email.lowercase' => 'L\'email doit être en minuscules.',

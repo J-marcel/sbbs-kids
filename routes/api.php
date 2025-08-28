@@ -98,11 +98,30 @@ Route::middleware('auth:sanctum')->group(function () {
     ->group(function () {
         Route::controller(ParentController::class)->group(function () {
             Route::get('/parents', 'index');
-            Route::post('/parents-student', 'storeStudent');
-            Route::post('/profiles/{profile}/switch', [ParentController::class, 'switchProfile']);
-            Route::put('/parents-student/{parentModel}', 'update');
-            Route::delete('/parents/{parentModel}', 'destroy');
-            Route::patch('/parents/status/{parentModel}', 'status');
+            Route::prefix('students')->group(function () {
+
+                // Afficher mes étudiants
+                Route::get('/my-students','getMyStudents');
+
+                // Créer un nouvel étudiant
+                Route::post('/students', 'storeStudent');
+
+                // Switch vers le profil d'un étudiant
+                Route::post('/students/{student}/switch', 'switchToStudentProfile');
+
+                // Mettre à jour un étudiant
+                Route::put('/students/{student}', 'updateStudent');
+                // Route::patch('/students/{student}', 'updateStudent');
+
+                // Supprimer un étudiant
+                Route::delete('/students/{student}', 'destroyStudent');
+
+                Route::patch('/{student}/pin',  'updateStudentPin');
+                Route::post('/{student}/reset-pin', 'resetStudentPin');
+
+                // Déconnexion du profil étudiant
+                Route::post('/students/logout', 'logoutFromStudentProfile');
+            });
         });
     });
 

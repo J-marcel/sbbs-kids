@@ -42,9 +42,9 @@ class LoginController extends Controller
         }
 
         // Rechercher l'utilisateur par email ou numéro de téléphone
-        $user = User::where(function($query) use ($loginField) {
+        $user = User::where(function ($query) use ($loginField) {
             $query->where('email', $loginField)
-                  ->orWhere('phone_number', $loginField);
+                ->orWhere('phone_number', $loginField);
         })->first();
 
         if (!$user || !Hash::check($validated['password'], $user->password)) {
@@ -68,11 +68,15 @@ class LoginController extends Controller
             if ($user->phone_number) $methods[] = 'sms';
             if ($user->number_whatsapp) $methods[] = 'whatsapp';
 
-            $results = $this->otpService->sendOtp($user, $methods);
+            // Toujours retourner un tableau même si aucun OTP n'est envoyé
+            $results = $this->otpService->sendOtp($user, $methods) ?? [];
 
+            // On filtre uniquement les méthodes qui ont réussi
             $sentMethods = array_keys(array_filter($results));
-            $methodsText = implode(', ', array_map(function($method) {
-                return match($method) {
+
+            // Conversion en texte lisible
+            $methodsText = implode(', ', array_map(function ($method) {
+                return match ($method) {
                     'email' => 'email',
                     'sms' => 'SMS',
                     'whatsapp' => 'WhatsApp'
@@ -109,14 +113,13 @@ class LoginController extends Controller
         // OU utiliser un package pour une meilleure détection
         $agent      = new Agent();
         $deviceInfo = [
-            'plateforme' => Agent::platform(), // Notez l'appel statique
+            'plateforme' => Agent::platform(),
             'navigateur' => Agent::browser(),
             'version'    => Agent::version(Agent::browser()),
             'appareil'   => Agent::isTablet() ? 'Tablette' : (Agent::isMobile() ? 'Mobile' : 'Ordinateur'),
             'robot'      => Agent::isRobot() ? Agent::robot() : false,
             'userAgent'  => $userAgent,
         ];
-
 
         // Connexion réussie
         Mail::to($user->email)->send(new NewLoginNotification($user, $ipAddress, $location, $deviceInfo));
@@ -143,7 +146,7 @@ class LoginController extends Controller
         }
 
         // Envoyer un OTP par email
-         $this->passwordResetOtpService->send($user);
+        $this->passwordResetOtpService->send($user);
 
         return response()->json([
             'message' => 'OTP envoyé par email.',
@@ -152,30 +155,30 @@ class LoginController extends Controller
     }
 
     public function resetPassword(StoreResetPasswordRequest $request): JsonResponse
-{
-    $validated = $request->validated();
+    {
+        $validated = $request->validated();
 
-    $user = User::where('email', $validated['email'])->first();
-    if (! $user) {
+        $user = User::where('email', $validated['email'])->first();
+        if (! $user) {
+            return response()->json([
+                'message' => 'Utilisateur non trouvé.',
+                'status'  => 404,
+            ], 404);
+        }
+
+        if (! $user->verifyOTP($validated['otp'])) {
+            return response()->json([
+                'message' => 'OTP incorrect ou expiré.',
+                'status'  => 400,
+            ], 400);
+        }
+
+        $user->password = Hash::make($validated['password']);
+        $user->save();
+
         return response()->json([
-            'message' => 'Utilisateur non trouvé.',
-            'status'  => 404,
-        ], 404);
+            'message' => 'Mot de passe modifié.',
+            'status'  => 200,
+        ], 200);
     }
-
-    if (! $user->verifyOTP($validated['otp'])) {
-        return response()->json([
-            'message' => 'OTP incorrect ou expiré.',
-            'status'  => 400,
-        ], 400);
-    }
-
-    $user->password = Hash::make($validated['password']);
-    $user->save();
-
-    return response()->json([
-        'message' => 'Mot de passe modifié.',
-        'status'  => 200,
-    ], 200);
-}
 }

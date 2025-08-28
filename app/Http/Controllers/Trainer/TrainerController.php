@@ -9,7 +9,7 @@ use App\Models\Admin;
 use App\Models\Trainer;
 use App\Models\User;
 use App\Services\TrainerWelcomeService;
-use Illuminate\Http\Request;
+use App\Traits\FileHandler;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
@@ -18,6 +18,7 @@ class TrainerController extends Controller
     /**
      * Display a listing of the resource.
      */
+    use FileHandler;
     public function index()
     {
         $trainers = Trainer::latest()->get();
@@ -55,6 +56,11 @@ class TrainerController extends Controller
             ], 403);
         }
 
+        if ($request->hasFile('avatar')) {
+            $avatar = $this->uploadFile($request->file('avatar'), 'avatars');
+            $validated['avatar'] = $avatar;
+        }
+
         // Créer l'utilisateur (avec un mot de passe aléatoire)
         $randomPassword = str()->random(8);
         $user = User::create([
@@ -79,6 +85,7 @@ class TrainerController extends Controller
             'number_whatsapp' => $validated['number_whatsapp'],
             'user_id' => $user->id,
             'admin_id' => $verifAdmin->id,
+            'avatar' => $validated['avatar'],
         ];
 
         $trainer = Trainer::create($trainerData);
@@ -136,6 +143,11 @@ class TrainerController extends Controller
                 if ($user) {
                     $user->update($userUpdateData);
                 }
+            }
+
+            if ($request->hasFile('avatar')) {
+                $avatar = $this->uploadFile($request->file('avatar'), 'avatars');
+                $trainer->avatar = $avatar;
             }
 
             if (!empty($trainerUpdateData)) {

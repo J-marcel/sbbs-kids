@@ -15,9 +15,10 @@ return new class extends Migration
         Schema::create('parent_models', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
-            $table->string('name');
-            $table->enum('gender', ['male', 'female'])->default('male');
             $table->string('avatar')->nullable();
+            $table->string('name');
+            $table->string('email')->unique();
+            $table->enum('gender', ['male', 'female'])->default('male');
             $table->string('phone_number')->nullable();
             $table->string('number_whatsapp')->nullable();
             $table->boolean('is_main')->default(false);

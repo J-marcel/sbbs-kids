@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\ImageHelpers;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -11,6 +12,7 @@ class Trainer extends Model
 
     protected $fillable = [
         'name',
+        'avatar',
         'email',
         'gender',
         'age_group',
@@ -19,6 +21,15 @@ class Trainer extends Model
         'user_id',
         'admin_id',
     ];
+
+    protected $appends = [
+        'avatar_url',
+    ];
+
+    public function getAvatarUrlAttribute(): string | null
+    {
+        return ImageHelpers::pathToUrl($this->avatar);
+    }
 
     public function user()
     {

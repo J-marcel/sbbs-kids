@@ -23,6 +23,7 @@ class UpdateTrainerRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
+            'avatar' => 'nullable|file|mimes:jpeg,png,jpg|max:2048',
             'gender' => 'required|in:male,female',
             'phone_number' => 'nullable|string|max:255',
             'number_whatsapp' => 'nullable|string|max:255',
