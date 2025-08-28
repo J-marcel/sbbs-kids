@@ -57,7 +57,7 @@ class TrainerController extends Controller
         }
 
         if ($request->hasFile('avatar')) {
-            $avatar = $this->uploadFile($request->file('avatar'), 'avatars');
+            $avatar = $this->uploadFile($request->file('avatar'), 'avatars', 'public');
             $validated['avatar'] = $avatar;
         }
 
@@ -85,7 +85,7 @@ class TrainerController extends Controller
             'number_whatsapp' => $validated['number_whatsapp'],
             'user_id' => $user->id,
             'admin_id' => $verifAdmin->id,
-            'avatar' => $validated['avatar'],
+            'avatar' => $avatar,
         ];
 
         $trainer = Trainer::create($trainerData);
@@ -126,8 +126,8 @@ class TrainerController extends Controller
             $userUpdateData = [];
             $trainerUpdateData = [];
 
-            $userFields = ['name', 'phone_number', 'number_whatsapp'];
-            $trainerFields = ['name', 'gender', 'phone_number', 'number_whatsapp'];
+            $userFields = ['name','avatar','phone_number', 'number_whatsapp'];
+            $trainerFields = ['name','avatar','gender', 'phone_number', 'number_whatsapp'];
 
             foreach ($validated as $key => $value) {
                 if (in_array($key, $userFields)) {

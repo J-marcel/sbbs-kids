@@ -72,11 +72,11 @@ class ProfileController extends Controller
     {
         $validated = $request->validated();
         $user = Auth::user();
-        if($request->hasFile('avatar')) {
-            if($user->avatar) {
-                $this->deleteFile($user->avatar);
+        if ($request->hasFile('avatar')) {
+            if ($user->avatar) {
+                Storage::disk('public')->delete($user->avatar);
             }
-            $validated['avatar'] = $request->file('avatar')->store('avatars', 'public');
+            $validated['avatar'] = $this->uploadFile($request->file('avatar'), 'avatars', 'public');
         }
 
         $user->update($validated);
