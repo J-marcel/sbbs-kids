@@ -33,7 +33,7 @@ class TrainerController extends Controller
      */
     public function store(StoreTrainerRequest $request)
     {
-        //  Vérifier si l'email existe déjà
+        // Vérifier si l'email existe déjà
         $verifEmail = User::where('email', $request->email)->first();
         if ($verifEmail) {
             return response()->json([
@@ -56,6 +56,9 @@ class TrainerController extends Controller
             ], 403);
         }
 
+        // Initialiser $avatar avec une valeur par défaut (null ou chemin vers avatar par défaut)
+        $avatar = null;
+
         if ($request->hasFile('avatar')) {
             $avatar = $this->uploadFile($request->file('avatar'), 'avatars', 'public');
             $validated['avatar'] = $avatar;
@@ -76,7 +79,7 @@ class TrainerController extends Controller
             'password' => Hash::make($randomPassword),
         ]);
 
-        // Créer l'étudiant en liant avec l'utilisateur
+        // Créer l'enseignant en liant avec l'utilisateur
         $trainerData = [
             'name' => $validated['name'],
             'email' => $validated['email'],
@@ -85,7 +88,7 @@ class TrainerController extends Controller
             'number_whatsapp' => $validated['number_whatsapp'],
             'user_id' => $user->id,
             'admin_id' => $verifAdmin->id,
-            'avatar' => $avatar,
+            'avatar' => $avatar, // Maintenant $avatar est toujours défini
         ];
 
         $trainer = Trainer::create($trainerData);
@@ -126,8 +129,8 @@ class TrainerController extends Controller
             $userUpdateData = [];
             $trainerUpdateData = [];
 
-            $userFields = ['name','avatar','phone_number', 'number_whatsapp'];
-            $trainerFields = ['name','avatar','gender', 'phone_number', 'number_whatsapp'];
+            $userFields = ['name', 'avatar', 'phone_number', 'number_whatsapp'];
+            $trainerFields = ['name', 'avatar', 'gender', 'phone_number', 'number_whatsapp'];
 
             foreach ($validated as $key => $value) {
                 if (in_array($key, $userFields)) {
