@@ -34,4 +34,9 @@ class Admin extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function avatar()
+    {
+        return $this->hasOne(Avatar::class);
+    }
+
 }

@@ -39,7 +39,6 @@ class ParentController extends Controller
         // Validation des données
         $validator = Validator::make($request->all(), [
             'name' => ['required', 'string', 'max:255'],
-            'avatar' => ['nullable', 'file', 'mimes:jpeg,png,jpg', 'max:2048'],
             'gender' => ['required', 'in:male,female'],
             'age_group' => ['required', 'in:4-6,7-10,11-15,16-18'],
             'pin_code' => ['required', 'string', 'min:4', 'max:4'],
@@ -48,9 +47,6 @@ class ParentController extends Controller
             'name.string' => 'Le nom de l\'étudiant doit être une chaîne de caractères.',
             'name.max' => 'Le nom de l\'étudiant ne doit pas dépasser 255 caractères.',
 
-            'avatar.file' => 'L\'avatar doit être un fichier.',
-            'avatar.mimes' => 'L\'avatar doit être un fichier de type jpeg, png ou jpg.',
-            'avatar.max' => 'La taille de l\'avatar ne doit pas dépasser 2 Mo.',
 
             'gender.required' => 'Le genre de l\'étudiant est requis.',
             'gender.in' => 'Le genre de l\'étudiant doit être "male" ou "female".',
@@ -83,11 +79,6 @@ class ParentController extends Controller
                 ], 404);
             }
 
-            // Gestion de l'avatar
-            $avatar = null;
-            if ($request->hasFile('avatar')) {
-                $avatar = $this->uploadFile($request->file('avatar'), 'avatars');
-            }
 
             // Création de l'étudiant
             $student = Student::create([
@@ -95,7 +86,6 @@ class ParentController extends Controller
                 'name' => $request->name,
                 'gender' => $request->gender,
                 'age_group' => $request->age_group,
-                'avatar' => $avatar,
                 'pin_code' => Hash::make($request->pin_code),
             ]);
 
@@ -237,7 +227,6 @@ class ParentController extends Controller
             'name' => 'sometimes|required|string|max:255',
             'gender' => 'sometimes|required|in:male,female',
             'age_group' => 'sometimes|required|in:4-6,7-10,11-15,16-18',
-            'avatar' => 'required|file|mimes:jpeg,png,jpg|max:2048',
             'pin_code' => 'sometimes|required|string|min:4|max:4',
         ]);
 
@@ -248,11 +237,7 @@ class ParentController extends Controller
         DB::beginTransaction();
 
         try {
-            // Gestion de l'avatar
-            if ($request->hasFile('avatar')) {
-                $avatar = $this->uploadFile($request->file('avatar'), 'avatars');
-                $student->avatar = $avatar;
-            }
+
 
             // Mise à jour des données de base
             $student->fill($request->only(['name', 'gender', 'age_group']));

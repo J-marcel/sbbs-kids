@@ -16,7 +16,6 @@ return new class extends Migration
         Schema::create('students', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(ParentModel::class);
-            $table->string('avatar')->nullable();
             $table->string('name');
             $table->enum('gender', ['male', 'female'])->default('male');
             $table->enum('age_group', ['4-6', '7-10', '11-15', '16-18'])->default('4-6');

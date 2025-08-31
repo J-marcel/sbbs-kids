@@ -15,6 +15,7 @@ use App\Http\Controllers\Product\ProductImageContoller;
 use App\Http\Controllers\Profile\ProfileController;
 use App\Http\Controllers\Student\StudentController;
 use App\Http\Controllers\Trainer\TrainerController;
+use App\Http\Controllers\Admin\AvatarController;
 use Illuminate\Support\Facades\Route;
 
 // Route::get('/user', function (Request $request) {
@@ -60,6 +61,14 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::put('/admins/{admin}', 'update');
             Route::delete('/admins/{admin}', 'destroy');
             Route::patch('/admins/status/{admin}', 'status');
+        });
+
+        Route::controller(AvatarController::class)->group(function () {
+            Route::get('/avatars', 'index');
+            Route::post('/avatars', 'store');
+            Route::get('/avatars/{avatar}', 'show');
+            Route::put('/avatars/{avatar}', 'update');
+            Route::delete('/avatars/{avatar}', 'destroy');
         });
     });
 
