@@ -41,10 +41,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/users-compte-inactive', 'getUsersCompteInactive');
         Route::get('/profile', 'getProfile');
         Route::get('/show-profile/{user}', 'getShowProfile');
-        Route::put('/update-profile', 'UpdateProfile');
+        Route::put('/update-profile/{parent}', 'UpdateProfile');
         Route::post('/update-password', 'updatePassword');
         Route::post('/logout', 'logout');
-        Route::post('/destroy', 'destroy');
+        Route::delete('/destroy/{parent}', 'destroy');
         Route::patch('/compte-status/{user}', 'compteStatus');
         Route::patch('/update-email', 'updateEmail');
         Route::patch('/update-email-with-manual-check', 'updateEmailWithManualCheck');

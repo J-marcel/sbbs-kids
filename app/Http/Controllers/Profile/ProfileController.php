@@ -5,10 +5,13 @@ namespace App\Http\Controllers\Profile;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\StoreUpdatePasswordRequest;
 use App\Http\Requests\Profile\UpdateProfileRequest;
+use App\Models\ParentModel;
 use App\Models\User;
 use App\Traits\FileHandler;
+use Illuminate\Container\Attributes\Storage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class ProfileController extends Controller
@@ -68,24 +71,58 @@ class ProfileController extends Controller
     }
 
 
-    public function UpdateProfile(UpdateProfileRequest  $request): JsonResponse
+    public function UpdateProfile(UpdateProfileRequest  $request, ParentModel $parent): JsonResponse
     {
         $validated = $request->validated();
-        $user = Auth::user();
-        if ($request->hasFile('avatar')) {
-            if ($user->avatar) {
-                Storage::disk('public')->delete($user->avatar);
+        DB::beginTransaction();
+        try {
+            $userUpdateData = [];
+            $parentUpdateData = [];
+
+            $userFields = ['name', 'avatar', 'phone_number', 'number_whatsapp'];
+            $parentFields = ['name', 'avatar', 'gender', 'phone_number', 'number_whatsapp'];
+
+            foreach ($validated as $key => $value) {
+                if (in_array($key, $userFields)) {
+                    $userUpdateData[$key] = $value;
+                }
+                if (in_array($key, $parentFields)) {
+                    $parentUpdateData[$key] = $value;
+                }
             }
-            $validated['avatar'] = $this->uploadFile($request->file('avatar'), 'avatars', 'public');
+
+            if (!empty($userUpdateData) && $parent->user_id) {
+                $user = User::find($parent->user_id);
+                if ($user) {
+                    $user->update($userUpdateData);
+                }
+            }
+
+            if ($request->hasFile('avatar')) {
+                $avatar = $this->uploadFile($request->file('avatar'), 'avatars');
+                $parent->avatar = $avatar;
+            }
+
+            if (!empty($parentUpdateData)) {
+                $parent->update($parentUpdateData);
+            }
+
+            DB::commit();
+
+            $parent->load('user');
+
+            return response()->json([
+                'message' => 'Enseignant mis à jour avec succès',
+                'parent' => $parent->makeHidden('user'),
+                'status'  => 200,
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Erreur lors de la mise à jour de l\'enseignant',
+                'status'  => 500,
+            ], 500);
         }
-
-        $user->update($validated);
-
-        return response()->json([
-            'message' => 'Profil mis à jour',
-            'user' => $user,
-            'status' => '200'
-        ],200);
     }
 
 
