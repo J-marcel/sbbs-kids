@@ -71,7 +71,7 @@ class RegisterController extends Controller
 
         return response()->json([
             'message' => 'Votre compte a été créé avec succès. Codes OTP envoyés via : ' . implode(', ', $channels),
-            'user' => $user->load('parents'),
+            'parents' => $parent->makeHidden('user'),
             'delivery_status' => $results,
             'status' => '200'
         ], 200);
