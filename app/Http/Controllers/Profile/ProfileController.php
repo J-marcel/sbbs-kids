@@ -31,7 +31,7 @@ class ProfileController extends Controller
     public function getUsersCompteActive(): JsonResponse
     {
         $users = User::where('compte_active', 1)
-        ->latest()->get();
+            ->latest()->get();
         $counts = $users->count();
 
         return response()->json([
@@ -44,7 +44,7 @@ class ProfileController extends Controller
     public function getUsersCompteInactive(): JsonResponse
     {
         $users = User::where('compte_active', 0)
-        ->latest()->get();
+            ->latest()->get();
         $counts = $users->count();
 
         return response()->json([
@@ -132,7 +132,7 @@ class ProfileController extends Controller
 
         $user = auth()->user();
 
-        if(!Hash::check($validated['current_password'], $user->password)) {
+        if (!Hash::check($validated['current_password'], $user->password)) {
             return response()->json([
                 'message' => 'Mot de passe actuel incorrect.',
                 'status'  => 400,
@@ -146,7 +146,6 @@ class ProfileController extends Controller
             'message' => 'Mot de passe modifier.',
             'status'  => 200,
         ], 200);
-
     }
 
 
@@ -160,18 +159,40 @@ class ProfileController extends Controller
         ], 200);
     }
 
-    public function destroy(): JsonResponse
+    public function destroy(ParentModel $parent): JsonResponse
     {
-        $user = auth()->user();
-        $user->tokens()->delete();
-        $user->delete();
+        DB::beginTransaction();
 
+        try {
+            // Récupérer l'utilisateur associé avant de supprimer le parent
+            $user = $parent->user;
 
+            if ($user) {
+                // Supprimer tous les tokens de l'utilisateur
+                $user->tokens()->delete();
 
-        return response()->json([
-            'message' => 'Utilisateur supprimé.',
-            'status'  => 200,
-        ], 200);
+                // Supprimer l'utilisateur (cela peut déclencher une suppression en cascade)
+                $user->delete();
+            }
+
+            // Supprimer le parent
+            $parent->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Parent et utilisateur supprimés avec succès.',
+                'status' => '200'
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'message' => 'Erreur lors de la suppression du parent.',
+                'error' => $e->getMessage(), // Optionnel : pour le débogage
+                'status' => '500'
+            ], 500);
+        }
     }
 
     public function compteStatus(User $user): JsonResponse
@@ -185,5 +206,4 @@ class ProfileController extends Controller
             'status'  => 200,
         ], 200);
     }
-
 }

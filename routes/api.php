@@ -44,7 +44,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/update-profile/{parent}', 'UpdateProfile');
         Route::post('/update-password', 'updatePassword');
         Route::post('/logout', 'logout');
-        Route::delete('/destroy/{parent}', 'destroy');
+        // Route::delete('/destroy-parent/{parent}', 'destroy');
         Route::patch('/compte-status/{user}', 'compteStatus');
         Route::patch('/update-email', 'updateEmail');
         Route::patch('/update-email-with-manual-check', 'updateEmailWithManualCheck');
@@ -132,6 +132,7 @@ Route::middleware('auth:sanctum')->group(function () {
                 Route::post('/students/logout', 'logoutFromStudentProfile');
             });
         });
+        Route::delete('/destroy-parent/{parent}', [ProfileController::class, 'destroy']);
     });
 
 
