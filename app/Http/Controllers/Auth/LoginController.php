@@ -86,8 +86,9 @@ class LoginController extends Controller
             return response()->json([
                 'message' => "Votre compte n'est pas encore confirmé. Un code OTP a été envoyé via {$methodsText}.",
                 'sent_via' => $results,
-                'status' => 200,
-            ], 200);
+
+                'status' => 403,
+            ], 403);
         }
 
         // Obtenir l’adresse IP de l’utilisateur
