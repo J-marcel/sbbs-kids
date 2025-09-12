@@ -34,14 +34,14 @@ class VerifyOtpController extends Controller
 
         $otp = $validated['otp'];
 
-        if($user->otp_expires_at < now()) {
+        if ($user->otp_expires_at < now()) {
             return response()->json([
                 'message' => 'Le code OTP a expiré',
                 'status' => '400'
             ], 400);
         }
 
-        if(Hash::check($otp, $user->otp)) {
+        if (Hash::check($otp, $user->otp)) {
             $user->update([
                 'is_otp_verified' => true,
                 'email_verified_at' => now(),
@@ -53,7 +53,13 @@ class VerifyOtpController extends Controller
 
             return response()->json([
                 'message' => 'OTP vérifié avec succès',
-                'user' => $user,
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'role' => $user->role ? $user->role->name : null, // Ajouter le nom du rôle
+                    // autres attributs si besoin
+                ],
                 'token' => $token,
                 'status' => '200'
             ], 200);
