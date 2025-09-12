@@ -128,7 +128,13 @@ class LoginController extends Controller
 
         return response()->json([
             'message' => 'Connexion réussie.',
-            'user' => $user->name,
+            'user' => [
+        'id' => $user->id,
+        'name' => $user->name,
+        'email' => $user->email,
+        'role' => $user->role ? $user->role->name : null, // Ajouter le nom du rôle
+        // autres attributs si besoin
+    ],
             'token' => $token,
             'status' => 200,
         ], 200);
