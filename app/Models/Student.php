@@ -18,6 +18,7 @@ class Student extends Model
         'avatar',
         'gender',
         'age_group',
+        'age',
         'phone_number',
         'number_whatsapp',
         'pin_code',

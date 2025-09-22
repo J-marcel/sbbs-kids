@@ -7,6 +7,7 @@ use App\Models\ParentModel;
 use App\Models\Student;
 use Illuminate\Http\Request;
 use App\Traits\FileHandler;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
@@ -31,16 +32,27 @@ class ParentController extends Controller
         ], 200);
     }
 
+    public function getStudents(): JsonResponse
+    {
+        $students = Student::latest()->get();
+        return response()->json([
+            'students' => $students,
+            'status' => 200,
+        ], 200);
+    }
+
+
     /**
      * Créer un nouveau student pour le parent connecté
      */
-    public function storeStudent(Request $request)
+    public function storeStudent(Request $request): JsonResponse
     {
         // Validation des données
         $validator = Validator::make($request->all(), [
             'name' => ['required', 'string', 'max:255'],
             'gender' => ['required', 'in:male,female'],
             'age_group' => ['required', 'in:4-6,7-10,11-15,16-18'],
+            'age' => ['required', 'integer', 'min:4', 'max:18'],
             'pin_code' => ['required', 'string', 'min:4', 'max:4'],
         ], [
             'name.required' => 'Le nom de l\'étudiant est requis.',
@@ -53,6 +65,11 @@ class ParentController extends Controller
 
             'age_group.required' => 'La tranche d\'âge de l\'étudiant est requise.',
             'age_group.in' => 'La tranche d\'âge doit être "4-6", "7-10", "11-15" ou "16-18".',
+
+            'age.required' => 'L\'âge de l\'étudiant est requis.',
+            'age.integer' => 'L\'âge doit être un entier.',
+            'age.min' => 'L\'âge doit être au moins 4.',
+            'age.max' => 'L\'âge doit être au maximum 18.',
 
             'pin_code.required' => 'Le code PIN de l\'étudiant est requis.',
             'pin_code.string' => 'Le code PIN doit être une chaîne de caractères.',
@@ -86,6 +103,7 @@ class ParentController extends Controller
                 'name' => $request->name,
                 'gender' => $request->gender,
                 'age_group' => $request->age_group,
+                'age' => $request->age,
                 'pin_code' => Hash::make($request->pin_code),
             ]);
 

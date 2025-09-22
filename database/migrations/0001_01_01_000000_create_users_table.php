@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignIdFor(Role::class);
             $table->string('name');
             $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
+            $table->timestamp(column: 'email_verified_at')->nullable();
             $table->string('otp')->nullable();
             $table->timestamp('otp_expires_at')->nullable();
             $table->boolean('is_otp_verified')->default(false);

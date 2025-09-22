@@ -45,4 +45,12 @@ return [
         'whatsapp_enabled' => env('TWILIO_WHATSAPP_ENABLED', false), // Désactivé par défaut
     ],
 
+
+'infobip' => [
+        'base_url' => env('INFOBIP_BASE_URL', 'https://api.infobip.com'),
+        'api_key' => env('INFOBIP_API_KEY'),
+        'sender_name' => env('INFOBIP_SENDER_NAME', config('app.name')),
+        'whatsapp_sender' => env('INFOBIP_WHATSAPP_SENDER'),
+    ],
+
 ];

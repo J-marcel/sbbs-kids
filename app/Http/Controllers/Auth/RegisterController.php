@@ -53,6 +53,7 @@ class RegisterController extends Controller
         $parent->save();
 
         // Envoyer OTP par tous les canaux disponibles
+        // $results = $this->otpService->sendOtpMultiChannel($user);
         $results = $this->otpService->sendOtpMultiChannel($user);
 
         if (!$results['otp_sent']) {
