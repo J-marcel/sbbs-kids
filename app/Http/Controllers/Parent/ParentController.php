@@ -51,8 +51,8 @@ class ParentController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => ['required', 'string', 'max:255'],
             'gender' => ['required', 'in:male,female'],
-            'age_group' => ['required', 'in:4-6,7-10,11-15,16-18'],
-            'age' => ['required', 'integer', 'min:4', 'max:18'],
+            'age_group' => ['required', 'in:4-6,7-10,11-15'],
+            'age' => ['required', 'integer', 'min:4', 'max:15'],
             'pin_code' => ['required', 'string', 'min:4', 'max:4'],
         ], [
             'name.required' => 'Le nom de l\'étudiant est requis.',
@@ -64,12 +64,12 @@ class ParentController extends Controller
             'gender.in' => 'Le genre de l\'étudiant doit être "male" ou "female".',
 
             'age_group.required' => 'La tranche d\'âge de l\'étudiant est requise.',
-            'age_group.in' => 'La tranche d\'âge doit être "4-6", "7-10", "11-15" ou "16-18".',
+            'age_group.in' => 'La tranche d\'âge doit être "4-6", "7-10", "11-15".',
 
             'age.required' => 'L\'âge de l\'étudiant est requis.',
             'age.integer' => 'L\'âge doit être un entier.',
             'age.min' => 'L\'âge doit être au moins 4.',
-            'age.max' => 'L\'âge doit être au maximum 18.',
+            'age.max' => 'L\'âge doit être au maximum 15.',
 
             'pin_code.required' => 'Le code PIN de l\'étudiant est requis.',
             'pin_code.string' => 'Le code PIN doit être une chaîne de caractères.',
@@ -244,7 +244,7 @@ class ParentController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'sometimes|required|string|max:255',
             'gender' => 'sometimes|required|in:male,female',
-            'age_group' => 'sometimes|required|in:4-6,7-10,11-15,16-18',
+            'age_group' => 'sometimes|required|in:4-6,7-10,11-15',
             'pin_code' => 'sometimes|required|string|min:4|max:4',
         ]);
 
