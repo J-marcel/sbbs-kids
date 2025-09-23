@@ -22,6 +22,7 @@ class Student extends Model
         'phone_number',
         'number_whatsapp',
         'pin_code',
+        'avatar_id',
 
     ];
 
@@ -45,5 +46,10 @@ class Student extends Model
     public function checkPin($pin)
     {
         return Hash::check($pin, $this->pin_code);
+    }
+
+    public function avatar(): BelongsTo
+    {
+        return $this->belongsTo(Avatar::class, 'avatar_id', 'id');
     }
 }

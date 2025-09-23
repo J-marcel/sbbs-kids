@@ -21,10 +21,12 @@ class ParentController extends Controller
      */
     public function index()
     {
-        $parents = ParentModel::with('students')
-            ->where('is_main', true)
-            ->latest()
-            ->get();
+        $parents = ParentModel::with(['students' => function ($query) {
+            $query->with('avatar'); // pour charger l'avatar si nécessaire
+        }])
+        ->where('is_main', true)
+        ->latest()
+        ->get();
 
         return response()->json([
             'parents' => $parents,
@@ -51,9 +53,10 @@ class ParentController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => ['required', 'string', 'max:255'],
             'gender' => ['required', 'in:male,female'],
-            'age_group' => ['required', 'in:4-6,7-10,11-15'],
-            'age' => ['required', 'integer', 'min:4', 'max:15'],
+            'age_group' => ['required', 'in:4-7,8-12,13-17'],
+            'age' => ['required', 'integer', 'min:4', 'max:17'],
             'pin_code' => ['required', 'string', 'min:4', 'max:4'],
+            'avatar_id' => ['nullable', 'exists:avatars,id'],
         ], [
             'name.required' => 'Le nom de l\'étudiant est requis.',
             'name.string' => 'Le nom de l\'étudiant doit être une chaîne de caractères.',
@@ -64,17 +67,19 @@ class ParentController extends Controller
             'gender.in' => 'Le genre de l\'étudiant doit être "male" ou "female".',
 
             'age_group.required' => 'La tranche d\'âge de l\'étudiant est requise.',
-            'age_group.in' => 'La tranche d\'âge doit être "4-6", "7-10", "11-15".',
+            'age_group.in' => 'La tranche d\'âge doit être "4-7", "8-12", "13-17".',
 
             'age.required' => 'L\'âge de l\'étudiant est requis.',
             'age.integer' => 'L\'âge doit être un entier.',
             'age.min' => 'L\'âge doit être au moins 4.',
-            'age.max' => 'L\'âge doit être au maximum 15.',
+            'age.max' => 'L\'âge doit être au maximum 17.',
 
             'pin_code.required' => 'Le code PIN de l\'étudiant est requis.',
             'pin_code.string' => 'Le code PIN doit être une chaîne de caractères.',
             'pin_code.min' => 'Le code PIN doit comporter exactement 4 caractères.',
             'pin_code.max' => 'Le code PIN doit comporter exactement 4 caractères.',
+
+            'avatar_id.exists' => 'L\'avatar spécifié n\'existe pas.',
         ]);
 
         if ($validator->fails()) {
@@ -104,6 +109,7 @@ class ParentController extends Controller
                 'gender' => $request->gender,
                 'age_group' => $request->age_group,
                 'age' => $request->age,
+                'avatar_id' => $request->avatar_id,
                 'pin_code' => Hash::make($request->pin_code),
             ]);
 
@@ -111,7 +117,7 @@ class ParentController extends Controller
 
             return response()->json([
                 'message' => 'Étudiant créé avec succès',
-                'student' => $student,
+                'student' => $student->load('avatar'),
                 'status' => 200,
             ], 200);
         } catch (\Exception $e) {
@@ -205,7 +211,7 @@ class ParentController extends Controller
         return response()->json([
             'message' => 'Connexion réussie au profil étudiant',
             'token_type' => 'Bearer',
-            'student' => $student,
+            'student' => $student->load('avatar'),
             'parent' => $mainParent,
             'access_token' => $token,
             'status' => 200,
@@ -244,7 +250,9 @@ class ParentController extends Controller
         $validator = Validator::make($request->all(), [
             'name' => 'sometimes|required|string|max:255',
             'gender' => 'sometimes|required|in:male,female',
-            'age_group' => 'sometimes|required|in:4-6,7-10,11-15',
+            'age_group' => 'sometimes|required|in:4-7,8-12,13-17',
+            'age' => 'sometimes|required|integer|min:4|max:17',
+            'avatar_id' => 'sometimes|required|exists:avatars,id',
             'pin_code' => 'sometimes|required|string|min:4|max:4',
         ]);
 
@@ -258,7 +266,7 @@ class ParentController extends Controller
 
 
             // Mise à jour des données de base
-            $student->fill($request->only(['name', 'gender', 'age_group']));
+            $student->fill($request->only(['name', 'gender', 'age_group', 'age', 'avatar_id']));
 
             // Mise à jour du PIN si fourni
             if ($request->has('pin_code')) {
@@ -271,7 +279,7 @@ class ParentController extends Controller
 
             return response()->json([
                 'message' => 'Étudiant mis à jour avec succès',
-                'student' => $student,
+                'student' => $student->load('avatar'),
                 'status' => 200,
             ], 200);
         } catch (\Exception $e) {
