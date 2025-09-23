@@ -75,7 +75,7 @@ class AvatarController extends Controller
             $this->deleteFile($avatar->avatar);
         }
 
-        $avatarPath = $this->uploadFile($request->file('avatar'), 'avatars');
+        $avatarPath = $request->file('avatar')->store('avatars', 'public');
         $validated['avatar'] = $avatarPath;
     }
 
