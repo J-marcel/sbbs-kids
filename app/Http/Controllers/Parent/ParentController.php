@@ -21,7 +21,9 @@ class ParentController extends Controller
      */
     public function index()
     {
-        $parents = ParentModel::with(['students'])
+        $parents = ParentModel::with(['students' => function ($query) {
+            $query->with('avatar'); // pour charger l'avatar si nécessaire
+        }])
         ->where('is_main', true)
         ->latest()
         ->get();
