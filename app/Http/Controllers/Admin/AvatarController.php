@@ -34,7 +34,7 @@ class AvatarController extends Controller
         $validated = $request->validated();
 
         if($request->hasFile('avatar')){
-            $avatar = $this->uploadFile($request->file('avatar'), 'avatars');
+            $avatar = $request->file('avatar')->store('avatars', 'public');
             $validated['avatar'] = $avatar;
         }
 
