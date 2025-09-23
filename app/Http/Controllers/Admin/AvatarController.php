@@ -76,7 +76,7 @@ class AvatarController extends Controller
         }
 
         $avatarPath = $request->file('avatar')->store('avatars', 'public');
-        $validated['avatar'] = $avatarPath;
+         $validated['avatar'] = $avatarPath;
     }
 
     $avatar->update([
