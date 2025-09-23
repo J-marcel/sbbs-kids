@@ -19,24 +19,12 @@ class ParentController extends Controller
     /**
      * Afficher la liste des parents principaux avec leurs étudiants
      */
-    public function index()
+    public function index(): JsonResponse
     {
-        $parents = ParentModel::with(['students' => function ($query) {
-            $query->with('avatar'); // pour charger l'avatar si nécessaire
-        }])
-        ->where('is_main', true)
+        $students = Student::with('avatar')
         ->latest()
         ->get();
 
-        return response()->json([
-            'parents' => $parents,
-            'status' => 200,
-        ], 200);
-    }
-
-    public function getStudents(): JsonResponse
-    {
-        $students = Student::latest()->get();
         return response()->json([
             'students' => $students,
             'status' => 200,
@@ -149,7 +137,7 @@ class ParentController extends Controller
 
         return response()->json([
             'parent' => $mainParent,
-            'students' => $mainParent->students,
+            // 'students' => $mainParent->students,
             'status' => 200,
         ], 200);
     }

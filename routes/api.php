@@ -108,7 +108,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::controller(ParentController::class)->group(function () {
             Route::get('/parents', 'index');
             Route::prefix('students')->group(function () {
-
+                Route::get('/students', 'index');
                 // Afficher mes étudiants
                 Route::get('/my-students','getMyStudents');
 
