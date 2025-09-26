@@ -23,6 +23,7 @@ class Student extends Model
         'number_whatsapp',
         'pin_code',
         'avatar_id',
+        'role_id',
 
     ];
 
@@ -51,5 +52,10 @@ class Student extends Model
     public function avatar(): BelongsTo
     {
         return $this->belongsTo(Avatar::class, 'avatar_id', 'id');
+    }
+
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
     }
 }

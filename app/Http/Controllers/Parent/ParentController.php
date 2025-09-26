@@ -99,7 +99,8 @@ class ParentController extends Controller
                 'age' => $request->age,
                 'avatar_id' => $request->avatar_id,
                 'pin_code' => Hash::make($request->pin_code),
-            ]);
+                'role_id' => 4,
+                ]);
 
             DB::commit();
 
@@ -162,6 +163,7 @@ class ParentController extends Controller
         // Récupérer l'étudiant qui appartient à ce parent
         $student = Student::where('id', $studentId)
             ->where('parent_model_id', $mainParent->id)
+            ->with(['avatar', 'role:id,name'])
             ->first();
 
         if (!$student) {
