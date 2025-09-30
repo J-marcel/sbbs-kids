@@ -7,13 +7,14 @@ use App\Http\Requests\Admin\StoreAvatarRequest;
 use App\Http\Requests\Admin\UpdateAvatarRequest;
 use App\Models\Avatar;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use App\Traits\FileHandler;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class AvatarController extends Controller
 {
     use FileHandler;
+
     /**
      * Display a listing of the resource.
      */
@@ -33,23 +34,52 @@ class AvatarController extends Controller
     {
         $validated = $request->validated();
 
-        if($request->hasFile('avatar')){
-            $avatar = $request->file('avatar')->store('avatars', 'public');
-            $validated['avatar'] = $avatar;
+        $uploadedAvatars = [];
+        $adminId = Auth::user()->admin->id;
+
+        DB::beginTransaction();
+
+        try {
+            if ($request->hasFile('avatars')) {
+                foreach ($request->file('avatars') as $file) {
+                    // Stocker chaque fichier
+                    $avatarPath = $file->store('avatars', 'public');
+
+                    // Créer l'enregistrement dans la base de données
+                    $avatar = Avatar::create([
+                        'admin_id' => $adminId,
+                        'avatar' => $avatarPath,
+                    ]);
+
+                    $uploadedAvatars[] = $avatar->load('admin');
+                }
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'message' => count($uploadedAvatars) . ' avatar(s) créé(s) avec succès',
+                'avatars' => $uploadedAvatars,
+                'count' => count($uploadedAvatars),
+                'status' => 200,
+            ], 200);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            // Supprimer les fichiers uploadés en cas d'erreur
+            foreach ($uploadedAvatars as $avatar) {
+                if (isset($avatar->avatar)) {
+                    $this->deleteFile($avatar->avatar);
+                }
+            }
+
+            return response()->json([
+                'message' => 'Erreur lors de la création des avatars',
+                'error' => $e->getMessage(),
+                'status' => 500,
+            ], 500);
         }
-
-        $avatar = Avatar::create([
-            'admin_id' => Auth::user()->admin->id,
-            'avatar' => $validated['avatar'],
-        ]);
-
-        return response()->json([
-            'message' => 'Avatar créé avec succès',
-            'avatar' => $avatar->load('admin'),
-            'status' => 200,
-        ], 200);
-
-
     }
 
     /**
@@ -67,29 +97,29 @@ class AvatarController extends Controller
      * Update the specified resource in storage.
      */
     public function update(UpdateAvatarRequest $request, Avatar $avatar)
-{
-    $validated = $request->validated();
+    {
+        $validated = $request->validated();
 
-    if($request->hasFile('avatar')){
-        if($avatar->avatar){
-            $this->deleteFile($avatar->avatar);
+        if($request->hasFile('avatar')){
+            if($avatar->avatar){
+                $this->deleteFile($avatar->avatar);
+            }
+
+            $avatarPath = $request->file('avatar')->store('avatars', 'public');
+            $validated['avatar'] = $avatarPath;
         }
 
-        $avatarPath = $request->file('avatar')->store('avatars', 'public');
-         $validated['avatar'] = $avatarPath;
+        $avatar->update([
+            'admin_id' => Auth::user()->admin->id,
+            'avatar' => $validated['avatar'],
+        ]);
+
+        return response()->json([
+            'message' => 'Avatar mis à jour avec succès',
+            'avatar' => $avatar->load('admin'),
+            'status' => 200,
+        ], 200);
     }
-
-    $avatar->update([
-        'admin_id' => Auth::user()->admin->id,
-        'avatar' => $validated['avatar'],
-    ]);
-
-    return response()->json([
-        'message' => 'Avatar mis à jour avec succès',
-        'avatar' => $avatar->load('admin'),
-        'status' => 200,
-    ], 200);
-}
 
     /**
      * Remove the specified resource from storage.
@@ -100,6 +130,7 @@ class AvatarController extends Controller
             $this->deleteFile($avatar->avatar);
         }
         $avatar->delete();
+
         return response()->json([
             'message' => 'Avatar supprimé avec succès',
             'status' => 200,

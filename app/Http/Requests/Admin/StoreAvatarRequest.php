@@ -22,17 +22,44 @@ class StoreAvatarRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'avatar' => 'required|file|mimes:jpeg,png,jpg|max:2048',
+            'avatars' => 'required|array|min:1|max:10',
+            'avatars.*' => 'required|file|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ];
     }
 
-    public function messages()
+    /**
+     * Get custom messages for validator errors.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
     {
         return [
-            'avatar.required' => 'L\'avatar est requis.',
-            'avatar.file' => 'L\'avatar doit être un fichier.',
-            'avatar.mimes' => 'L\'avatar doit être une image (jpeg, png, jpg).',
-            'avatar.max' => 'L\'avatar doit avoir une taille maximale de 2Mo.',
+            // Messages pour le tableau d'avatars
+            'avatars.required' => 'Veuillez sélectionner au moins une image.',
+            'avatars.array' => 'Le format des avatars est invalide.',
+            'avatars.min' => 'Veuillez sélectionner au moins une image.',
+            'avatars.max' => 'Vous ne pouvez pas télécharger plus de 10 images à la fois.',
+            
+            // Messages pour chaque avatar individuel
+            'avatars.*.required' => 'Chaque fichier est requis.',
+            'avatars.*.file' => 'Chaque avatar doit être un fichier valide.',
+            'avatars.*.image' => 'Chaque fichier doit être une image.',
+            'avatars.*.mimes' => 'Les images doivent être au format: jpeg, png, jpg, gif ou webp.',
+            'avatars.*.max' => 'Chaque image ne doit pas dépasser 2 Mo.',
+        ];
+    }
+
+    /**
+     * Get custom attributes for validator errors.
+     *
+     * @return array<string, string>
+     */
+    public function attributes(): array
+    {
+        return [
+            'avatars' => 'avatars',
+            'avatars.*' => 'avatar',
         ];
     }
 }
