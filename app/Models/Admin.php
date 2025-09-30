@@ -39,4 +39,23 @@ class Admin extends Model
         return $this->hasOne(Avatar::class);
     }
 
+    public function levels()
+    {
+        return $this->hasMany(Level::class);
+    }
+
+    public function modules()
+    {
+        return $this->hasMany(Module::class);
+    }
+
+    public function courses()
+    {
+        return $this->hasMany(Course::class);
+    }
+
+    public function supports()
+    {
+        return $this->hasMany(Support::class);
+    }
 }

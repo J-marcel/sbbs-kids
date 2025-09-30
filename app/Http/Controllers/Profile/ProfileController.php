@@ -18,13 +18,13 @@ class ProfileController extends Controller
 {
     use FileHandler;
 
-    public function getAllUsers(): JsonResponse
+    public function getAllParents(): JsonResponse
     {
-        $users = User::latest()->get();
-        $counts = $users->count();
+        $parents = ParentModel::latest()->get();
+        $counts = $parents->count();
 
         return response()->json([
-            'users' => $users,
+            'parents' => $parents,
             'count' => $counts
         ]);
     }
