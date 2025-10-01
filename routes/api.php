@@ -157,7 +157,6 @@ Route::middleware('auth:sanctum')->group(function () {
             // Route::get('/show-profile/{user}', 'getShowProfile');
             Route::put('/update-profile/{parent}', 'UpdateProfile');
             Route::post('/update-password', 'updatePassword');
-            Route::post('/logout', 'logout');
             // Route::delete('/destroy-parent/{parent}', 'destroy');
             Route::patch('/compte-status/{user}', 'compteStatus');
             Route::patch('/update-email', 'updateEmail');
@@ -166,5 +165,5 @@ Route::middleware('auth:sanctum')->group(function () {
         });
     });
 
-
+    Route::post('/logout', [ProfileController::class, 'logout']);
 });
