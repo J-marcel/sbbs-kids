@@ -19,7 +19,6 @@ class StoreModuleRequest extends FormRequest
             'applications' => 'required|string',
             'level_id' => 'required|exists:levels,id',
             'admin_id' => 'required|exists:admins,id',
-            'support_id' => 'required|exists:supports,id',
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
 
             // Champs des cours (tableau)
@@ -29,7 +28,14 @@ class StoreModuleRequest extends FormRequest
             'courses.*.competences' => 'required|string',
             'courses.*.price' => 'required|numeric|min:0',
             'courses.*.libelle' => 'required|string|max:255',
-            'courses.*.video' => 'required|url|active_url', // URL valide et accessible
+            'courses.*.video' => 'required|url|active_url',
+
+            // Champs des supports (tableau)
+            'supports' => 'required|array|min:1',
+            'supports.*.libelle' => 'required|string|max:255',
+            'supports.*.pdf' => 'nullable|file|mimes:pdf|max:2048',
+            'supports.*.video' => 'nullable|url|active_url',
+            'supports.*.description' => 'nullable|string',
         ];
     }
 
@@ -45,8 +51,6 @@ class StoreModuleRequest extends FormRequest
             'level_id.exists' => 'Le niveau sélectionné n\'existe pas',
             'admin_id.required' => 'L\'administrateur est obligatoire',
             'admin_id.exists' => 'L\'administrateur sélectionné n\'existe pas',
-            'support_id.required' => 'Le support est obligatoire',
-            'support_id.exists' => 'Le support sélectionné n\'existe pas',
             'image.required' => 'L\'image est obligatoire',
             'image.image' => 'Le fichier doit être une image valide',
             'image.mimes' => 'L\'image doit être au format jpeg, png, jpg ou gif',
@@ -69,6 +73,18 @@ class StoreModuleRequest extends FormRequest
             'courses.*.video.required' => 'L\'URL de la vidéo est obligatoire',
             'courses.*.video.url' => 'L\'URL de la vidéo n\'est pas valide',
             'courses.*.video.active_url' => 'L\'URL de la vidéo n\'est pas accessible',
+
+            // Messages pour les supports
+            'supports.required' => 'Au moins un support est obligatoire',
+            'supports.array' => 'Les supports doivent être un tableau',
+            'supports.min' => 'Vous devez ajouter au moins un support',
+            'supports.*.libelle.required' => 'Le libellé du support est obligatoire',
+            'supports.*.libelle.max' => 'Le libellé du support ne doit pas dépasser 255 caractères',
+            'supports.*.pdf.file' => 'Le fichier PDF doit être un fichier valide',
+            'supports.*.pdf.mimes' => 'Le fichier PDF doit être au format PDF',
+            'supports.*.pdf.max' => 'Le fichier PDF ne doit pas dépasser 2 Mo',
+            'supports.*.video.url' => 'L\'URL de la vidéo n\'est pas valide',
+            'supports.*.video.active_url' => 'L\'URL de la vidéo n\'est pas accessible',
         ];
     }
 }

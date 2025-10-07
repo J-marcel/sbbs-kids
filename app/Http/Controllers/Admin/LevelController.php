@@ -16,15 +16,23 @@ class LevelController extends Controller
      */
     public function index(): JsonResponse
     {
-        $levels = Level::with('admin')
+        $levels = Level::with([
+            'admin:id,name,email',
+            'modules' => function ($query) {
+                $query->select('id', 'name', 'applications', 'image', 'level_id', 'admin_id');
+            },
+            'modules.courses:id,title,duration,competences,price,libelle,video,module_id,admin_id',
+            'modules.supports:id,libelle,pdf,video,description,module_id,admin_id',
+            'modules.admin:id,name'
+        ])
         ->latest()
         ->get();
+
         return response()->json([
             'levels' => $levels,
             'status' => 200,
         ], 200);
     }
-
     /**
      * Store a newly created resource in storage.
      */
@@ -39,7 +47,13 @@ class LevelController extends Controller
         $level = Level::create($validated);
         return response()->json([
             'message' => 'Niveau créé avec succès',
-            'level' => $level->load('admin'),
+            'level' => $level->load([
+                'admin',
+                'modules.courses:id,title,duration,competences,price,libelle,video,module_id,admin_id',
+                'modules.supports:id,libelle,pdf,video,description,module_id,admin_id',
+                'modules.level',
+                'modules.admin'
+            ]),
             'status' => 200,
         ], 200);
     }
@@ -51,7 +65,13 @@ class LevelController extends Controller
     {
         return response()->json([
             'message' => 'Niveau affiché avec succès',
-            'level' => $level->load('admin'),
+            'level' => $level->load([
+                'admin',
+                'modules.courses:id,title,duration,competences,price,libelle,video,module_id,admin_id',
+                'modules.supports:id,libelle,pdf,video,description,module_id,admin_id',
+                'modules.level',
+                'modules.admin'
+            ]),
             'status' => 200,
         ], 200);
     }
@@ -73,7 +93,13 @@ class LevelController extends Controller
         $level->update($validated);
         return response()->json([
             'message' => 'Niveau modifié avec succès',
-            'level' => $level->load('admin'),
+            'level' => $level->load([
+                'admin',
+                'modules.courses:id,title,duration,competences,price,libelle,video,module_id,admin_id',
+                'modules.supports:id,libelle,pdf,video,description,module_id,admin_id',
+                'modules.level',
+                'modules.admin'
+            ]),
             'status' => 200,
         ], 200);
     }

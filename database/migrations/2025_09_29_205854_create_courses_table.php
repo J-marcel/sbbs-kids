@@ -20,7 +20,7 @@ return new class extends Migration
             $table->text('competences');
             $table->decimal('price', 10, 2);
             $table->string('libelle');
-            $table->string('video');
+            $table->string('image');
             $table->foreignIdFor(Module::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Admin::class)->constrained()->cascadeOnDelete();
             $table->timestamps();

@@ -30,5 +30,10 @@ class Level extends Model
         return $this->belongsTo(Admin::class);
     }
 
+    public function modules()
+    {
+        return $this->hasMany(Module::class);
+    }
+
 
 }

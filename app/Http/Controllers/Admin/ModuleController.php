@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreModuleRequest;
 use App\Models\Course;
 use App\Models\Module;
+use App\Models\Support;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -17,7 +18,7 @@ class ModuleController extends Controller
      */
     public function index()
     {
-        $modules = Module::with('level', 'admin', 'support', 'courses')
+        $modules = Module::with('level', 'admin', 'supports', 'courses')
             ->latest()
             ->get();
 
@@ -36,52 +37,66 @@ class ModuleController extends Controller
             DB::beginTransaction();
             $validated = $request->validated();
 
-
-            // Créer le module
-
-            if($request->hasFile('image')) {
+            // Gérer l'image du module
+            if ($request->hasFile('image')) {
                 $image = $request->file('image')->store('images', 'public');
                 $validated['image'] = $image;
             }
+
+            // Créer le module
             $module = Module::create([
                 'name' => $validated['name'],
                 'applications' => $validated['applications'],
                 'image' => $validated['image'],
                 'level_id' => $validated['level_id'],
-                'support_id' => $validated['support_id'],
                 'admin_id' => auth()->user()->id,
             ]);
 
             $createdCourses = [];
+            $createdSupports = [];
 
             // Créer les cours associés
-            foreach ($request->courses as $index => $courseData) {
-                $course = [
+            foreach ($request->courses as $courseData) {
+                $course = Course::create([
                     'title' => $courseData['title'],
                     'duration' => $courseData['duration'],
                     'competences' => $courseData['competences'],
                     'price' => $courseData['price'],
                     'libelle' => $courseData['libelle'],
+                    'video' => $courseData['video'],
                     'module_id' => $module->id,
                     'admin_id' => auth()->user()->id,
-                ];
+                ]);
+                $createdCourses[] = $course;
+            }
 
+            // Créer les supports associés
+            foreach ($request->supports as $index => $supportData) {
+                $pdfPath = null;
 
-                $videoUrl = $courseData['video'] ?? null;
-                $course['video'] = $videoUrl;
+                // Gérer le fichier PDF s'il est présent
+                if ($request->hasFile("supports.{$index}.pdf")) {
+                    $pdfPath = $request->file("supports.{$index}.pdf")->store('supports/pdf', 'public');
+                }
 
-                $createdCourses[] = Course::create($course);
+                $support = Support::create([
+                    'libelle' => $supportData['libelle'],
+                    'pdf' => $pdfPath,
+                    'video' => $supportData['video'] ?? null,
+                    'description' => $supportData['description'] ?? null,
+                    'module_id' => $module->id,
+                    'admin_id' => auth()->user()->id,
+                ]);
+                $createdSupports[] = $support;
             }
 
             DB::commit();
 
             return response()->json([
-                'message' => 'Module et cours créés avec succès',
-                'module' => $module->load('level', 'admin', 'support', 'courses'),
-                'courses' => $createdCourses,
+                'message' => 'Module, cours et supports créés avec succès',
+                'module' => $module->load('level', 'admin', 'supports', 'courses', 'supports'),
                 'status' => 201,
             ], 201);
-
         } catch (\Throwable $th) {
             DB::rollBack();
 
@@ -97,7 +112,7 @@ class ModuleController extends Controller
      */
     public function show(Module $module)
     {
-        $module->load('level', 'admin', 'support', 'courses');
+        $module->load('level', 'admin', 'supports', 'courses', 'supports');
 
         return response()->json([
             'module' => $module,
@@ -114,43 +129,68 @@ class ModuleController extends Controller
             DB::beginTransaction();
             $validated = $request->validated();
 
+            // Gérer la nouvelle image si fournie
+            if ($request->hasFile('image')) {
+                // Supprimer l'ancienne image
+                if ($module->image && Storage::disk('public')->exists($module->image)) {
+                    Storage::disk('public')->delete($module->image);
+                }
+                $image = $request->file('image')->store('images', 'public');
+                $validated['image'] = $image;
+            } else {
+                $validated['image'] = $module->image;
+            }
+
+            // Mettre à jour le module
             $module->update([
                 'name' => $validated['name'],
                 'applications' => $validated['applications'],
                 'image' => $validated['image'],
                 'level_id' => $validated['level_id'],
-                'support_id' => $validated['support_id'],
+                // 'support_id' => $validated['support_id'],
                 'admin_id' => auth()->user()->id,
             ]);
 
+            // Mettre à jour les cours (supprimer et recréer)
             $module->courses()->delete();
-
-            $createdCourses = [];
-
-            // Créer les cours associés
-            foreach ($request->courses as $index => $courseData) {
-                $course = [
+            foreach ($request->courses as $courseData) {
+                Course::create([
                     'title' => $courseData['title'],
                     'duration' => $courseData['duration'],
                     'competences' => $courseData['competences'],
                     'price' => $courseData['price'],
                     'libelle' => $courseData['libelle'],
+                    'video' => $courseData['video'],
                     'module_id' => $module->id,
                     'admin_id' => auth()->user()->id,
-                ];
+                ]);
+            }
 
-                $videoUrl = $courseData['video'] ?? null;
-                $course['video'] = $videoUrl;
+            // Mettre à jour les supports (supprimer et recréer)
+            $module->supports()->delete();
+            foreach ($request->supports as $index => $supportData) {
+                $pdfPath = null;
 
-                $createdCourses[] = Course::create($course);
+                // Gérer le fichier PDF s'il est présent
+                if (isset($supportData['pdf']) && $request->hasFile("supports.{$index}.pdf")) {
+                    $pdfPath = $request->file("supports.{$index}.pdf")->store('supports/pdf', 'public');
+                }
+
+                Support::create([
+                    'libelle' => $supportData['libelle'],
+                    'pdf' => $pdfPath,
+                    'video' => $supportData['video'] ?? null,
+                    'description' => $supportData['description'] ?? null,
+                    'module_id' => $module->id,
+                    'admin_id' => auth()->user()->id,
+                ]);
             }
 
             DB::commit();
 
             return response()->json([
-                'message' => 'Module et cours mis à jour avec succès',
-                'module' => $module->load('level', 'admin', 'support', 'courses'),
-                'courses' => $createdCourses,
+                'message' => 'Module, cours et supports mis à jour avec succès',
+                'module' => $module->load('level', 'admin', 'supports', 'courses', 'supports'),
                 'status' => 200,
             ], 200);
         } catch (\Throwable $th) {
@@ -168,31 +208,37 @@ class ModuleController extends Controller
      */
     public function destroy(Module $module)
     {
-                try {
-                DB::beginTransaction();
+        try {
+            DB::beginTransaction();
 
-                // Supprimer l'image associée si elle existe
-                if ($module->image && Storage::disk('public')->exists($module->image)) {
-                    Storage::disk('public')->delete($module->image);
-                }
-
-                // Supprimer le module (les cours seront supprimés en cascade si configuré)
-                $module->delete();
-
-                DB::commit();
-
-                return response()->json([
-                    'message' => 'Module supprimé avec succès',
-                    'status' => 200,
-                ], 200);
-
-            } catch (\Throwable $th) {
-                DB::rollBack();
-
-                return response()->json([
-                    'message' => 'Erreur lors de la suppression: ' . $th->getMessage(),
-                    'status' => 500,
-                ], 500);
+            // Supprimer l'image associée si elle existe
+            if ($module->image && Storage::disk('public')->exists($module->image)) {
+                Storage::disk('public')->delete($module->image);
             }
+
+            // Supprimer les fichiers PDF des supports
+            foreach ($module->supports as $support) {
+                if ($support->pdf && Storage::disk('public')->exists($support->pdf)) {
+                    Storage::disk('public')->delete($support->pdf);
+                }
+            }
+
+            // Supprimer le module (les cours et supports seront supprimés en cascade si configuré)
+            $module->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Module supprimé avec succès',
+                'status' => 200,
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+
+            return response()->json([
+                'message' => 'Erreur lors de la suppression: ' . $th->getMessage(),
+                'status' => 500,
+            ], 500);
+        }
     }
 }

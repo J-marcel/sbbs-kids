@@ -11,8 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('courses', function (Blueprint $table) {
-            $table->dropColumn('image');
+        Schema::table('modules', function (Blueprint $table) {
+            $table->dropForeign(['support_id']); // Si une clé étrangère existe
+            $table->dropColumn('support_id');
         });
     }
 
@@ -21,8 +22,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('courses', function (Blueprint $table) {
-            $table->string('image');
+        Schema::table('modules', function (Blueprint $table) {
+            $table->foreignId('support_id')->constrained()->cascadeOnDelete();
         });
     }
 };

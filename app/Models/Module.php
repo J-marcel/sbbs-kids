@@ -45,4 +45,9 @@ class Module extends Model
     {
         return $this->hasMany(Course::class);
     }
+
+    public function supports()
+    {
+        return $this->hasMany(Support::class);
+    }
 }
