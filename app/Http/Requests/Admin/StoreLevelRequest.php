@@ -22,7 +22,6 @@ class StoreLevelRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'number' => 'required|integer',
             'name' => 'required|string',
             'age_group' => 'required|in:4-7,8-12,13-17',
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
@@ -34,8 +33,6 @@ class StoreLevelRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'number.required' => 'Le numéro est requis.',
-            'number.integer' => 'Le numéro doit être un entier.',
             'name.required' => 'Le nom est requis.',
             'name.string' => 'Le nom doit être une chaîne de caractères.',
             'age_group.required' => 'Le groupe d\'âge est requis.',
