@@ -49,4 +49,9 @@ class Course extends Model
     {
         return $this->belongsTo(Module::class);
     }
+
+    public function workshops()
+    {
+        return $this->hasMany(Workshop::class);
+    }
 }

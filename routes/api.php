@@ -20,6 +20,7 @@ use App\Http\Controllers\Admin\LevelController;
 use App\Http\Controllers\Admin\SupportController;
 use App\Http\Controllers\Admin\ModuleController;
 use App\Http\Controllers\Admin\CoursesController;
+use App\Http\Controllers\Admin\WorkshopController;
 use Illuminate\Support\Facades\Route;
 
 // Route::get('/user', function (Request $request) {
@@ -92,6 +93,14 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/courses/{course}', 'show');
             Route::put('/courses/{course}', 'update');
             Route::delete('/courses/{course}', 'destroy');
+        });
+
+        Route::controller(WorkshopController::class)->group(function () {
+            Route::get('/workshops', 'index');
+            Route::post('/workshops', 'store');
+            Route::get('/workshops/{workshop}', 'show');
+            Route::put('/workshops/{workshop}', 'update');
+            Route::delete('/workshops/{workshop}', 'destroy');
         });
     });
 

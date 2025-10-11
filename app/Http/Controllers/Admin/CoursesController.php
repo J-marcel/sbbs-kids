@@ -18,7 +18,7 @@ class CoursesController extends Controller
      */
     public function index()
     {
-        $courses = Course::with(['module', 'admin', 'supports', 'activities'])
+        $courses = Course::with(['module',  'supports', 'activities', 'workshops', 'admin'])
             ->latest()
             ->get();
 
@@ -107,7 +107,7 @@ class CoursesController extends Controller
      */
     public function show(Course $course)
     {
-        $course->load(['module', 'admin', 'supports', 'activities']);
+        $course->load(['module',  'supports', 'activities', 'workshops', 'admin']);
 
         return response()->json([
             'success' => true,
