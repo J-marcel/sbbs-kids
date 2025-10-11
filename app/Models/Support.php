@@ -13,7 +13,7 @@ class Support extends Model
         'pdf',
         'video',
         'description',
-        'module_id'
+        'course_id'
     ];
 
     protected $appends = [
@@ -48,8 +48,8 @@ class Support extends Model
         return $this->belongsTo(Admin::class);
     }
 
-    public function module()
+    public function course()
     {
-        return $this->belongsTo(Module::class);
+        return $this->belongsTo(Course::class);
     }
 }

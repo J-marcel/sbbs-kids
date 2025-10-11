@@ -22,6 +22,7 @@ return new class extends Migration
             $table->foreignIdFor(Admin::class)->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
+        
     }
 
     /**

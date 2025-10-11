@@ -19,6 +19,7 @@ use App\Http\Controllers\Admin\AvatarController;
 use App\Http\Controllers\Admin\LevelController;
 use App\Http\Controllers\Admin\SupportController;
 use App\Http\Controllers\Admin\ModuleController;
+use App\Http\Controllers\Admin\CoursesController;
 use Illuminate\Support\Facades\Route;
 
 // Route::get('/user', function (Request $request) {
@@ -69,13 +70,13 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::delete('/levels/{level}', 'destroy');
         });
 
-        Route::controller(SupportController::class)->group(function () {
-            Route::get('/supports', 'index');
-            Route::post('/supports', 'store');
-            Route::get('/supports/{support}', 'show');
-            Route::put('/supports/{support}', 'update');
-            Route::delete('/supports/{support}', 'destroy');
-        });
+        // Route::controller(SupportController::class)->group(function () {
+        //     Route::get('/supports', 'index');
+        //     Route::post('/supports', 'store');
+        //     Route::get('/supports/{support}', 'show');
+        //     Route::put('/supports/{support}', 'update');
+        //     Route::delete('/supports/{support}', 'destroy');
+        // });
 
         Route::controller(ModuleController::class)->group(function () {
             Route::get('/modules', 'index');
@@ -83,6 +84,14 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/modules/{module}', 'show');
             Route::put('/modules/{module}', 'update');
             Route::delete('/modules/{module}', 'destroy');
+        });
+
+        Route::controller(CoursesController::class)->group(function () {
+            Route::get('/courses', 'index');
+            Route::post('/courses', 'store');
+            Route::get('/courses/{course}', 'show');
+            Route::put('/courses/{course}', 'update');
+            Route::delete('/courses/{course}', 'destroy');
         });
     });
 

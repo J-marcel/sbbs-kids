@@ -1,7 +1,7 @@
 <?php
 
 use App\Models\Admin;
-use App\Models\Module;
+use App\Models\Course;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,14 +13,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('courses', function (Blueprint $table) {
+        Schema::create('activities', function (Blueprint $table) {
             $table->id();
             $table->string('title');
-            $table->string('libelle');
-            $table->text('objectif');
-            $table->text('guide_for_parents');
-            $table->text('introduction');
-            $table->foreignIdFor(Module::class)->constrained()->cascadeOnDelete();
+            $table->string('libelle')->nullable();
+            $table->text('description')->nullable();
+            $table->foreignIdFor(Course::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(Admin::class)->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
@@ -31,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('courses');
+        Schema::dropIfExists('activities');
     }
 };
