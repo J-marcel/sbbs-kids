@@ -19,7 +19,7 @@ class LevelController extends Controller
         $levels = Level::with([
             'admin:id,name,email',
             'modules' => function ($query) {
-                $query->select('id', 'name', 'applications', 'image', 'level_id', 'admin_id');
+                $query->select('id', 'name', 'applications', 'level_id', 'admin_id');
             },
             'modules.courses',
             'modules.supports',
