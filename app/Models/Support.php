@@ -53,8 +53,5 @@ class Support extends Model
         return $this->belongsTo(Course::class);
     }
 
-    public function module()
-    {
-        return $this->belongsTo(Module::class);
-    }
+
 }

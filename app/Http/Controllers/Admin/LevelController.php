@@ -22,7 +22,6 @@ class LevelController extends Controller
                 $query->select('id', 'name', 'applications', 'level_id', 'admin_id');
             },
             'modules.courses',
-            'modules.supports',
             'modules.admin:id,name'
         ])
         ->latest()
@@ -50,7 +49,6 @@ class LevelController extends Controller
             'level' => $level->load([
                 'admin',
                 'modules.courses',
-                'modules.supports',
                 'modules.level',
                 'modules.admin'
             ]),
@@ -68,7 +66,6 @@ class LevelController extends Controller
             'level' => $level->load([
                 'admin',
                 'modules.courses',
-                'modules.supports',
                 'modules.level',
                 'modules.admin'
             ]),
@@ -96,7 +93,6 @@ class LevelController extends Controller
             'level' => $level->load([
                 'admin',
                 'modules.courses',
-                'modules.supports',
                 'modules.level',
                 'modules.admin'
             ]),

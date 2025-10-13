@@ -10,7 +10,6 @@ class Module extends Model
     protected $fillable = [
         'name',
         'applications',
-        'support_id',
         'level_id',
         'admin_id',
     ];
@@ -26,10 +25,6 @@ class Module extends Model
         return $this->belongsTo(Admin::class);
     }
 
-    public function supports()
-    {
-        return $this->hasMany(Support::class);
-    }
 
     public function courses()
     {
