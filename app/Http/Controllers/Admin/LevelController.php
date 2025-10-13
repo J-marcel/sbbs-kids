@@ -21,8 +21,8 @@ class LevelController extends Controller
             'modules' => function ($query) {
                 $query->select('id', 'name', 'applications', 'image', 'level_id', 'admin_id');
             },
-            'modules.courses:id,title,duration,competences,price,libelle,video,module_id,admin_id',
-            'modules.supports:id,libelle,pdf,video,description,module_id,admin_id',
+            'modules.courses',
+            'modules.supports',
             'modules.admin:id,name'
         ])
         ->latest()
@@ -49,8 +49,8 @@ class LevelController extends Controller
             'message' => 'Niveau créé avec succès',
             'level' => $level->load([
                 'admin',
-                'modules.courses:id,title,duration,competences,price,libelle,video,module_id,admin_id',
-                'modules.supports:id,libelle,pdf,video,description,module_id,admin_id',
+                'modules.courses',
+                'modules.supports',
                 'modules.level',
                 'modules.admin'
             ]),
@@ -67,8 +67,8 @@ class LevelController extends Controller
             'message' => 'Niveau affiché avec succès',
             'level' => $level->load([
                 'admin',
-                'modules.courses:id,title,duration,competences,price,libelle,video,module_id,admin_id',
-                'modules.supports:id,libelle,pdf,video,description,module_id,admin_id',
+                'modules.courses',
+                'modules.supports',
                 'modules.level',
                 'modules.admin'
             ]),
@@ -95,8 +95,8 @@ class LevelController extends Controller
             'message' => 'Niveau modifié avec succès',
             'level' => $level->load([
                 'admin',
-                'modules.courses:id,title,duration,competences,price,libelle,video,module_id,admin_id',
-                'modules.supports:id,libelle,pdf,video,description,module_id,admin_id',
+                'modules.courses',
+                'modules.supports',
                 'modules.level',
                 'modules.admin'
             ]),

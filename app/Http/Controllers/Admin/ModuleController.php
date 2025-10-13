@@ -18,7 +18,7 @@ class ModuleController extends Controller
      */
     public function index()
     {
-        $modules = Module::with('level', 'admin', 'supports', 'courses')
+        $modules = Module::with('level', 'admin', 'courses')
             ->latest()
             ->get();
 
@@ -70,7 +70,7 @@ class ModuleController extends Controller
      */
     public function show(Module $module)
     {
-        $module->load('level', 'admin');
+        $module->load('level', 'admin', 'courses');
 
         return response()->json([
             'module' => $module,
@@ -103,7 +103,7 @@ class ModuleController extends Controller
 
             return response()->json([
                 'message' => 'Module, cours et supports mis à jour avec succès',
-                'module' => $module->load('level', 'admin'),
+                'module' => $module->load('level', 'admin', 'courses'),
                 'status' => 200,
             ], 200);
         } catch (\Throwable $th) {

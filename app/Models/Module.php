@@ -26,14 +26,14 @@ class Module extends Model
         return $this->belongsTo(Admin::class);
     }
 
-    public function support()
+    public function supports()
     {
-        return $this->belongsTo(Support::class);
+        return $this->hasMany(Support::class);
     }
 
     public function courses()
     {
         return $this->hasMany(Course::class);
     }
-    
+
 }
