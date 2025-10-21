@@ -18,7 +18,7 @@ class CoursesController extends Controller
      */
     public function index()
     {
-        $courses = Course::with(['module',  'supports', 'activities', 'workshops', 'admin'])
+        $courses = Course::with(['module',  'supports', 'activities', 'workshops', 'level', 'admin'])
             ->latest()
             ->get();
 
@@ -46,6 +46,7 @@ class CoursesController extends Controller
                 'introduction' => $request->introduction,
                 'conclusion' => $request->conclusion,
                 'module_id' => $request->module_id,
+                'level_id' => $request->level_id,
                 'admin_id' => auth()->user()->id,
             ]);
 
@@ -108,7 +109,7 @@ class CoursesController extends Controller
      */
     public function show(Course $course)
     {
-        $course->load(['module',  'supports', 'activities', 'workshops', 'admin']);
+        $course->load(['module',  'supports', 'activities', 'workshops', 'level', 'admin']);
 
         return response()->json([
             'success' => true,
@@ -134,6 +135,7 @@ class CoursesController extends Controller
                 'introduction' => $request->introduction ?? $course->introduction,
                 'conclusion' => $request->conclusion ?? $course->conclusion,
                 'module_id' => $request->module_id ?? $course->module_id,
+                'level_id' => $request->level_id ?? $course->level_id,
                 'admin_id' => auth()->user()->id,
 
             ]);

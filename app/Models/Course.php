@@ -14,6 +14,7 @@ class Course extends Model
         'guide_for_parents',
         'introduction',
         'conclusion',
+        'level_id',
         'module_id',
         'admin_id',
     ];
@@ -54,5 +55,10 @@ class Course extends Model
     public function workshops()
     {
         return $this->hasMany(Workshop::class);
+    }
+
+    public function level()
+    {
+        return $this->belongsTo(Level::class);
     }
 }

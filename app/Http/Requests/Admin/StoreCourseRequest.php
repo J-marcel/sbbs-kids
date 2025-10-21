@@ -29,6 +29,7 @@ class StoreCourseRequest extends FormRequest
             'introduction' => ['required', 'string'],
             'conclusion' => ['required', 'string'],
             'module_id' => ['required', 'integer', 'exists:modules,id'],
+            'level_id' => ['required', 'integer', 'exists:levels,id'],
 
 
               // Champs des supports (tableau)
@@ -62,6 +63,8 @@ class StoreCourseRequest extends FormRequest
             'conclusion.required' => 'La conclusion est obligatoire.',
             'module_id.required' => 'Le module est obligatoire.',
             'module_id.exists' => 'Le module sélectionné n\'existe pas.',
+            'level_id.required' => 'Le niveau est obligatoire.',
+            'level_id.exists' => 'Le niveau sélectionné n\'existe pas.',
 
             // Messages pour les supports
             'supports.required' => 'Au moins un support est obligatoire',

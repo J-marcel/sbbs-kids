@@ -29,6 +29,7 @@ class UpdateCourseRequest extends FormRequest
             'introduction' => ['sometimes', 'required', 'string'],
             'conclusion' => ['sometimes', 'required', 'string'],
             'module_id' => ['sometimes', 'required', 'integer', 'exists:modules,id'],
+            'level_id' => ['sometimes', 'required', 'integer', 'exists:levels,id'],
             'admin_id' => ['sometimes', 'required', 'integer', 'exists:admins,id'],
 
             // Champs des supports (tableau)
@@ -63,6 +64,8 @@ class UpdateCourseRequest extends FormRequest
             'module_id.required' => 'Le module est obligatoire.',
             'module.string' => 'Le module doit être une chaîne de caractères',
             'module_id.exists' => 'Le module sélectionné n\'existe pas.',
+            'level_id.required' => 'Le niveau est obligatoire.',
+            'level_id.exists' => 'Le niveau sélectionné n\'existe pas.',
             'admin_id.required' => 'L\'administrateur est obligatoire.',
             'admin_id.exists' => 'L\'administrateur sélectionné n\'existe pas.',
 
