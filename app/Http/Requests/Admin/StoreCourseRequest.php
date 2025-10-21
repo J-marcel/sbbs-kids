@@ -27,6 +27,7 @@ class StoreCourseRequest extends FormRequest
             'objectif' => ['required', 'string'],
             'guide_for_parents' => ['required', 'string'],
             'introduction' => ['required', 'string'],
+            'conclusion' => ['required', 'string'],
             'module_id' => ['required', 'integer', 'exists:modules,id'],
 
 
@@ -58,6 +59,7 @@ class StoreCourseRequest extends FormRequest
             'objectif.required' => 'L\'objectif est obligatoire.',
             'guide_for_parents.required' => 'Le guide pour les parents est obligatoire.',
             'introduction.required' => 'L\'introduction est obligatoire.',
+            'conclusion.required' => 'La conclusion est obligatoire.',
             'module_id.required' => 'Le module est obligatoire.',
             'module_id.exists' => 'Le module sélectionné n\'existe pas.',
 

@@ -13,6 +13,7 @@ class Course extends Model
         'objectif',
         'guide_for_parents',
         'introduction',
+        'conclusion',
         'module_id',
         'admin_id',
     ];

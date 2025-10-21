@@ -44,6 +44,7 @@ class CoursesController extends Controller
                 'objectif' => $request->objectif,
                 'guide_for_parents' => $request->guide_for_parents,
                 'introduction' => $request->introduction,
+                'conclusion' => $request->conclusion,
                 'module_id' => $request->module_id,
                 'admin_id' => auth()->user()->id,
             ]);
@@ -131,6 +132,7 @@ class CoursesController extends Controller
                 'objectif' => $request->objectif ?? $course->objectif,
                 'guide_for_parents' => $request->guide_for_parents ?? $course->guide_for_parents,
                 'introduction' => $request->introduction ?? $course->introduction,
+                'conclusion' => $request->conclusion ?? $course->conclusion,
                 'module_id' => $request->module_id ?? $course->module_id,
                 'admin_id' => auth()->user()->id,
 

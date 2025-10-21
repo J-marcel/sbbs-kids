@@ -28,6 +28,78 @@ class ModuleController extends Controller
         ], 200);
     }
 
+
+    /**
+     * Display modules grouped by age_group
+     */
+    public function getByAgeGroup(Request $request)
+    {
+        try {
+            // Récupérer tous les modules avec leurs relations
+            $modules = Module::with(['level', 'admin', 'courses'])
+                ->get()
+                ->groupBy(function ($module) {
+                    return $module->level->age_group;
+                });
+
+            // Formater le résultat
+            $result = [];
+            foreach ($modules as $ageGroup => $groupModules) {
+                $result[] = [
+                    'age_group' => $ageGroup,
+                    'modules' => $groupModules
+                ];
+            }
+
+            return response()->json([
+                'data' => $result,
+                'status' => 200,
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'Erreur lors de la récupération: ' . $th->getMessage(),
+                'status' => 500,
+            ], 500);
+        }
+    }
+
+    /**
+     * Display modules by specific age_group
+     */
+    public function getBySpecificAgeGroup(string $ageGroup)
+    {
+        try {
+            // Valider l'age_group
+            $validAgeGroups = ['4-7', '8-12', '13-17'];
+
+            if (!in_array($ageGroup, $validAgeGroups)) {
+                return response()->json([
+                    'message' => 'Groupe d\'âge invalide',
+                    'status' => 400,
+                ], 400);
+            }
+
+            // Récupérer les modules pour ce groupe d'âge
+            $modules = Module::with(['level', 'admin', 'courses'])
+                ->whereHas('level', function ($query) use ($ageGroup) {
+                    $query->where('age_group', $ageGroup);
+                })
+                ->get();
+
+            return response()->json([
+                'age_group' => $ageGroup,
+                'modules' => $modules,
+                'count' => $modules->count(),
+                'status' => 200,
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'Erreur lors de la récupération: ' . $th->getMessage(),
+                'status' => 500,
+            ], 500);
+        }
+    }
+
     /**
      * Store a newly created resource in storage.
      */

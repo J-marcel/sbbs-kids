@@ -44,144 +44,148 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     Route::prefix('admin')
-    ->middleware('auth:sanctum')
-    ->group(function () {
-        Route::controller(AdminController::class)->group(function () {
-            Route::get('/admins', 'index');
-            Route::post('/admins', 'store');
-            Route::get('/admins/{admin}', 'show');
-            Route::put('/admins/{admin}', 'update');
-            Route::delete('/admins/{admin}', 'destroy');
-            Route::patch('/admins/status/{admin}', 'status');
-        });
+        ->middleware('auth:sanctum')
+        ->group(function () {
+            Route::controller(AdminController::class)->group(function () {
+                Route::get('/admins', 'index');
+                Route::post('/admins', 'store');
+                Route::get('/admins/{admin}', 'show');
+                Route::put('/admins/{admin}', 'update');
+                Route::delete('/admins/{admin}', 'destroy');
+                Route::patch('/admins/status/{admin}', 'status');
+            });
 
-        Route::controller(AvatarController::class)->group(function () {
-            Route::get('/avatars', 'index');
-            Route::post('/avatars', 'store');
-            Route::get('/avatars/{avatar}', 'show');
-            Route::put('/avatars/{avatar}', 'update');
-            Route::delete('/avatars/{avatar}', 'destroy');
-        });
+            Route::controller(AvatarController::class)->group(function () {
+                Route::get('/avatars', 'index');
+                Route::post('/avatars', 'store');
+                Route::get('/avatars/{avatar}', 'show');
+                Route::put('/avatars/{avatar}', 'update');
+                Route::delete('/avatars/{avatar}', 'destroy');
+            });
 
-        Route::controller(LevelController::class)->group(function () {
-            Route::get('/levels', 'index');
-            Route::post('/levels', 'store');
-            Route::get('/levels/{level}', 'show');
-            Route::put('/levels/{level}', 'update');
-            Route::delete('/levels/{level}', 'destroy');
-        });
+            Route::controller(LevelController::class)->group(function () {
+                Route::get('/levels', 'index');
+                Route::post('/levels', 'store');
+                Route::get('/levels/{level}', 'show');
+                Route::put('/levels/{level}', 'update');
+                Route::delete('/levels/{level}', 'destroy');
+            });
 
-        // Route::controller(SupportController::class)->group(function () {
-        //     Route::get('/supports', 'index');
-        //     Route::post('/supports', 'store');
-        //     Route::get('/supports/{support}', 'show');
-        //     Route::put('/supports/{support}', 'update');
-        //     Route::delete('/supports/{support}', 'destroy');
-        // });
+            // Route::controller(SupportController::class)->group(function () {
+            //     Route::get('/supports', 'index');
+            //     Route::post('/supports', 'store');
+            //     Route::get('/supports/{support}', 'show');
+            //     Route::put('/supports/{support}', 'update');
+            //     Route::delete('/supports/{support}', 'destroy');
+            // });
 
-        Route::controller(ModuleController::class)->group(function () {
-            Route::get('/modules', 'index');
-            Route::post('/modules', 'store');
-            Route::get('/modules/{module}', 'show');
-            Route::put('/modules/{module}', 'update');
-            Route::delete('/modules/{module}', 'destroy');
-        });
+            Route::controller(ModuleController::class)->group(function () {
+                Route::get('/modules', 'index');
+                Route::post('/modules', 'store');
 
-        Route::controller(CoursesController::class)->group(function () {
-            Route::get('/courses', 'index');
-            Route::post('/courses', 'store');
-            Route::get('/courses/{course}', 'show');
-            Route::put('/courses/{course}', 'update');
-            Route::delete('/courses/{course}', 'destroy');
-        });
+                // ✅ Routes spécifiques EN PREMIER (avant {module})
+                Route::get('/modules/by-age-group', 'getByAgeGroup');
+                Route::get('/modules/age-group/{ageGroup}', 'getBySpecificAgeGroup');
 
-        Route::controller(WorkshopController::class)->group(function () {
-            Route::get('/workshops', 'index');
-            Route::post('/workshops', 'store');
-            Route::get('/workshops/{workshop}', 'show');
-            Route::put('/workshops/{workshop}', 'update');
-            Route::delete('/workshops/{workshop}', 'destroy');
+                // ✅ Routes avec paramètres dynamiques EN DERNIER
+                Route::get('/modules/{module}', 'show');
+                Route::put('/modules/{module}', 'update');
+                Route::delete('/modules/{module}', 'destroy');
+            });
+            Route::controller(CoursesController::class)->group(function () {
+                Route::get('/courses', 'index');
+                Route::post('/courses', 'store');
+                Route::get('/courses/{course}', 'show');
+                Route::put('/courses/{course}', 'update');
+                Route::delete('/courses/{course}', 'destroy');
+            });
+
+            Route::controller(WorkshopController::class)->group(function () {
+                Route::get('/workshops', 'index');
+                Route::post('/workshops', 'store');
+                Route::get('/workshops/{workshop}', 'show');
+                Route::put('/workshops/{workshop}', 'update');
+                Route::delete('/workshops/{workshop}', 'destroy');
+            });
         });
-    });
 
 
     Route::prefix('student')
-    ->middleware('auth:sanctum')
-    ->group(function () {
-        Route::controller(StudentController::class)->group(function () {
-            Route::get('/students', 'index');
-            Route::get('/students/statistics', 'statistics');
-            Route::post('/students', 'store');
-            Route::get('/students/{student}', 'show');
-            Route::put('/students/{student}', 'update');
-            Route::delete('/students/{student}', 'destroy');
-            Route::patch('/students/status/{student}', 'status');
+        ->middleware('auth:sanctum')
+        ->group(function () {
+            Route::controller(StudentController::class)->group(function () {
+                Route::get('/students', 'index');
+                Route::get('/students/statistics', 'statistics');
+                Route::post('/students', 'store');
+                Route::get('/students/{student}', 'show');
+                Route::put('/students/{student}', 'update');
+                Route::delete('/students/{student}', 'destroy');
+                Route::patch('/students/status/{student}', 'status');
+            });
         });
-    });
 
 
     Route::prefix('trainer')
-    ->middleware('auth:sanctum')
-    ->group(function () {
-        Route::controller(TrainerController::class)->group(function () {
-            Route::get('/trainers', 'index');
-            Route::post('/trainers', 'store');
-            Route::get('/trainers/{trainer}', 'show');
-            Route::put('/trainers/{trainer}', 'update');
-            Route::delete('/trainers/{trainer}', 'destroy');
-            Route::patch('/trainers/status/{trainer}', 'status');
+        ->middleware('auth:sanctum')
+        ->group(function () {
+            Route::controller(TrainerController::class)->group(function () {
+                Route::get('/trainers', 'index');
+                Route::post('/trainers', 'store');
+                Route::get('/trainers/{trainer}', 'show');
+                Route::put('/trainers/{trainer}', 'update');
+                Route::delete('/trainers/{trainer}', 'destroy');
+                Route::patch('/trainers/status/{trainer}', 'status');
+            });
         });
-    });
 
 
     Route::prefix('parent')
-    ->middleware('auth:sanctum')
-    ->group(function () {
-        Route::controller(ParentController::class)->group(function () {
-            Route::get('/parents', 'index');
-            Route::prefix('students')->group(function () {
-                Route::get('/students', 'index');
-                // Afficher mes étudiants
-                Route::get('/my-students','getMyStudents');
+        ->middleware('auth:sanctum')
+        ->group(function () {
+            Route::controller(ParentController::class)->group(function () {
+                Route::get('/parents', 'index');
+                Route::prefix('students')->group(function () {
+                    Route::get('/students', 'index');
+                    // Afficher mes étudiants
+                    Route::get('/my-students', 'getMyStudents');
 
-                // Créer un nouvel étudiant
-                Route::post('/students', 'storeStudent');
+                    // Créer un nouvel étudiant
+                    Route::post('/students', 'storeStudent');
 
-                // Switch vers le profil d'un étudiant
-                Route::post('/students/{student}/switch', 'switchToStudentProfile');
+                    // Switch vers le profil d'un étudiant
+                    Route::post('/students/{student}/switch', 'switchToStudentProfile');
 
-                // Mettre à jour un étudiant
-                Route::put('/students/{student}', 'updateStudent');
-                // Route::patch('/students/{student}', 'updateStudent');
+                    // Mettre à jour un étudiant
+                    Route::put('/students/{student}', 'updateStudent');
+                    // Route::patch('/students/{student}', 'updateStudent');
 
-                // Supprimer un étudiant
-                Route::delete('/students/{student}', 'destroyStudent');
+                    // Supprimer un étudiant
+                    Route::delete('/students/{student}', 'destroyStudent');
 
-                Route::patch('/{student}/pin',  'updateStudentPin');
-                Route::post('/{student}/reset-pin', 'resetStudentPin');
+                    Route::patch('/{student}/pin',  'updateStudentPin');
+                    Route::post('/{student}/reset-pin', 'resetStudentPin');
 
-                // Déconnexion du profil étudiant
-                Route::post('/students/logout', 'logoutFromStudentProfile');
+                    // Déconnexion du profil étudiant
+                    Route::post('/students/logout', 'logoutFromStudentProfile');
+                });
+            });
+            Route::delete('/destroy-parent/{parent}', [ProfileController::class, 'destroy']);
+
+
+            Route::controller(ProfileController::class)->group(function () {
+
+                Route::get('/users-compte-active', 'getUsersCompteActive');
+                Route::get('/users-compte-inactive', 'getUsersCompteInactive');
+                Route::get('/parents', 'getAllParents');
+                // Route::get('/show-profile/{user}', 'getShowProfile');
+                Route::put('/update-profile/{parent}', 'UpdateProfile');
+                Route::post('/update-password', 'updatePassword');
+                // Route::delete('/destroy-parent/{parent}', 'destroy');
+                Route::patch('/compte-status/{user}', 'compteStatus');
+                Route::patch('/update-email', 'updateEmail');
+                Route::patch('/update-email-with-manual-check', 'updateEmailWithManualCheck');
             });
         });
-        Route::delete('/destroy-parent/{parent}', [ProfileController::class, 'destroy']);
-
-
-        Route::controller(ProfileController::class)->group(function () {
-
-            Route::get('/users-compte-active', 'getUsersCompteActive');
-            Route::get('/users-compte-inactive', 'getUsersCompteInactive');
-            Route::get('/parents', 'getAllParents');
-            // Route::get('/show-profile/{user}', 'getShowProfile');
-            Route::put('/update-profile/{parent}', 'UpdateProfile');
-            Route::post('/update-password', 'updatePassword');
-            // Route::delete('/destroy-parent/{parent}', 'destroy');
-            Route::patch('/compte-status/{user}', 'compteStatus');
-            Route::patch('/update-email', 'updateEmail');
-            Route::patch('/update-email-with-manual-check', 'updateEmailWithManualCheck');
-
-        });
-    });
 
     Route::post('/logout', [ProfileController::class, 'logout']);
 });

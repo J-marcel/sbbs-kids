@@ -27,6 +27,7 @@ class UpdateCourseRequest extends FormRequest
             'objectif' => ['sometimes', 'required', 'string'],
             'guide_for_parents' => ['sometimes', 'required', 'string'],
             'introduction' => ['sometimes', 'required', 'string'],
+            'conclusion' => ['sometimes', 'required', 'string'],
             'module_id' => ['sometimes', 'required', 'integer', 'exists:modules,id'],
             'admin_id' => ['sometimes', 'required', 'integer', 'exists:admins,id'],
 
@@ -58,7 +59,9 @@ class UpdateCourseRequest extends FormRequest
             'objectif.required' => 'L\'objectif est obligatoire.',
             'guide_for_parents.required' => 'Le guide pour les parents est obligatoire.',
             'introduction.required' => 'L\'introduction est obligatoire.',
+            'conclusion.required' => 'La conclusion est obligatoire.',
             'module_id.required' => 'Le module est obligatoire.',
+            'module.string' => 'Le module doit être une chaîne de caractères',
             'module_id.exists' => 'Le module sélectionné n\'existe pas.',
             'admin_id.required' => 'L\'administrateur est obligatoire.',
             'admin_id.exists' => 'L\'administrateur sélectionné n\'existe pas.',
