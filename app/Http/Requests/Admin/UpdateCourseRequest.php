@@ -23,7 +23,7 @@ class UpdateCourseRequest extends FormRequest
     {
         return [
             'title' => ['sometimes', 'required', 'string', 'max:255'],
-            'libelle' => ['sometimes', 'required', 'string', 'max:255'],
+            'libelle' => ['nullable', 'string', 'max:255'],
             'objectif' => ['sometimes', 'required', 'string'],
             'guide_for_parents' => ['sometimes', 'required', 'string'],
             'introduction' => ['sometimes', 'required', 'string'],
@@ -56,7 +56,6 @@ class UpdateCourseRequest extends FormRequest
     {
         return [
             'title.required' => 'Le titre est obligatoire.',
-            'libelle.required' => 'Le libellé est obligatoire.',
             'objectif.required' => 'L\'objectif est obligatoire.',
             'guide_for_parents.required' => 'Le guide pour les parents est obligatoire.',
             'introduction.required' => 'L\'introduction est obligatoire.',
