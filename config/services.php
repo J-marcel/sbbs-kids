@@ -34,15 +34,24 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+    // 'twilio' => [
+    //     'sid' => env('TWILIO_ACCOUNT_SID'),
+    //     'token' => env('TWILIO_AUTH_TOKEN'),
+    //     'phone_number' => env('TWILIO_PHONE_NUMBER'),
+    //     'whatsapp_number' => env('TWILIO_WHATSAPP_NUMBER', env('TWILIO_PHONE_NUMBER')),
+
+    //     // Contrôles d'activation des services
+    //     'sms_enabled' => env('TWILIO_SMS_ENABLED', true),
+    //     'whatsapp_enabled' => env('TWILIO_WHATSAPP_ENABLED', false), // Désactivé par défaut
+    // ],
+
     'twilio' => [
         'sid' => env('TWILIO_ACCOUNT_SID'),
         'token' => env('TWILIO_AUTH_TOKEN'),
         'phone_number' => env('TWILIO_PHONE_NUMBER'),
         'whatsapp_number' => env('TWILIO_WHATSAPP_NUMBER', env('TWILIO_PHONE_NUMBER')),
-
-        // Contrôles d'activation des services
         'sms_enabled' => env('TWILIO_SMS_ENABLED', true),
-        'whatsapp_enabled' => env('TWILIO_WHATSAPP_ENABLED', false), // Désactivé par défaut
+        'whatsapp_enabled' => env('TWILIO_WHATSAPP_ENABLED', false),
     ],
 
 

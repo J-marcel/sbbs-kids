@@ -1,7 +1,5 @@
 <?php
 
-
-
 namespace App\Services;
 
 use App\Models\User;
@@ -11,52 +9,20 @@ use Illuminate\Support\Facades\Log;
 
 class OtpService
 {
-    protected InfobipService $infobipService;
+    protected TwilioService $twilioService;
 
-    public function __construct(InfobipService $infobipService)
+    public function __construct(TwilioService $twilioService)
     {
-        $this->infobipService = $infobipService;
+        $this->twilioService = $twilioService;
     }
 
     /**
-     * Envoyer OTP par les méthodes spécifiées
+     * Envoyer OTP par email uniquement (méthode existante)
      */
-    public function sendOtp(User $user, array $methods = ['email']): array
+    public function sendOtp(User $user): void
     {
         $otp = $user->generateOTP();
-
-        $results = [];
-
-        foreach ($methods as $method) {
-            switch ($method) {
-                case 'email':
-                    $results['email'] = $this->sendOtpEmail($user, $otp);
-                    break;
-                case 'sms':
-                    $results['sms'] = $this->infobipService->sendOtpSms($user, $otp);
-                    break;
-                case 'whatsapp':
-                    $results['whatsapp'] = $this->infobipService->sendOtpWhatsApp($user, $otp);
-                    break;
-            }
-        }
-
-        return $results;
-    }
-
-    /**
-     * Envoyer OTP par email uniquement
-     */
-    protected function sendOtpEmail(User $user, string $otp): bool
-    {
-        try {
-            Mail::to($user->email)->send(new OtpMail($otp, $user));
-            Log::info("Email OTP envoyé avec succès à {$user->email}");
-            return true;
-        } catch (\Exception $e) {
-            Log::error("Erreur envoi email OTP: " . $e->getMessage());
-            return false;
-        }
+        Mail::to($user->email)->send(new OtpMail($otp, $user));
     }
 
     /**
@@ -74,12 +40,18 @@ class OtpService
         ];
 
         // Envoyer par email
-        $results['email'] = $this->sendOtpEmail($user, $otp);
+        try {
+            Mail::to($user->email)->send(new OtpMail($otp, $user));
+            $results['email'] = true;
+            Log::info("Email OTP envoyé avec succès à {$user->email}");
+        } catch (\Exception $e) {
+            Log::error("Erreur envoi email OTP: " . $e->getMessage());
+        }
 
-        // Envoyer par SMS et WhatsApp via Infobip
-        $infobipResults = $this->infobipService->sendOtpMultiChannel($user, $otp);
-        $results['sms'] = $infobipResults['sms'];
-        $results['whatsapp'] = $infobipResults['whatsapp'];
+        // Envoyer par SMS et WhatsApp via Twilio
+        $twilioResults = $this->twilioService->sendOtpMultiChannel($user, $otp);
+        $results['sms'] = $twilioResults['sms'];
+        $results['whatsapp'] = $twilioResults['whatsapp'];
 
         // Vérifier si au moins un canal a fonctionné
         $results['otp_sent'] = $results['email'] || $results['sms'] || $results['whatsapp'];
@@ -93,7 +65,7 @@ class OtpService
     public function sendOtpSms(User $user): bool
     {
         $otp = $user->generateOTP();
-        return $this->infobipService->sendOtpSms($user, $otp);
+        return $this->twilioService->sendSMS($user, $otp);
     }
 
     /**
@@ -102,6 +74,6 @@ class OtpService
     public function sendOtpWhatsApp(User $user): bool
     {
         $otp = $user->generateOTP();
-        return $this->infobipService->sendOtpWhatsApp($user, $otp);
+        return $this->twilioService->sendWhatsApp($user, $otp);
     }
 }

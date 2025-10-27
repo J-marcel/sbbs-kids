@@ -67,6 +67,7 @@ class CoursesController extends Controller
                         'pdf' => $pdfPath,
                         'video' => $supportData['video'] ?? null,
                         'description' => $supportData['description'] ?? null,
+                        'type' => $supportData['type'] ?? null,
                     ]);
                 }
             }
@@ -165,6 +166,7 @@ class CoursesController extends Controller
                         'pdf' => $pdfPath,
                         'video' => $supportData['video'] ?? null,
                         'description' => $supportData['description'] ?? null,
+                        'type' => $supportData['type'] ?? null,
                     ]);
                 }
             }
