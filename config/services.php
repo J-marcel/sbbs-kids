@@ -55,7 +55,7 @@ return [
     ],
 
 
-'infobip' => [
+    'infobip' => [
         'base_url' => env('INFOBIP_BASE_URL', 'https://api.infobip.com'),
         'api_key' => env('INFOBIP_API_KEY'),
         'sender_name' => env('INFOBIP_SENDER_NAME', config('app.name')),
@@ -63,9 +63,10 @@ return [
     ],
 
     'cinetpay' => [
-    'api_key' => env('CINETPAY_API_KEY'),
-    'site_id' => env('CINETPAY_SITE_ID'),
-    'api_url' => env('CINETPAY_API_URL', 'https://api-checkout.cinetpay.com/v2/payment'),
-],
+        'api_key' => env('CINETPAY_API_KEY'),
+        'site_id' => env('CINETPAY_SITE_ID'),
+        'api_url' => env('CINETPAY_API_URL', 'https://api-checkout.cinetpay.com/v2/payment'),
+        'webhook_secret' => env('CINETPAY_WEBHOOK_SECRET'), // Optionnel
+    ],
 
 ];
