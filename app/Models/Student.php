@@ -6,6 +6,7 @@ use App\Helpers\ImageHelpers;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\Hash;
 
 class Student extends Model
@@ -57,5 +58,30 @@ class Student extends Model
     public function role()
     {
         return $this->belongsTo(Role::class);
+    }
+
+
+    public function subscriptions(): BelongsToMany
+    {
+        return $this->belongsToMany(Subscription::class, 'student_subscription')
+            ->withTimestamps();
+    }
+
+    // Vérifier si l'élève a un abonnement actif
+    public function hasActiveSubscription(): bool
+    {
+        return $this->subscriptions()
+            ->where('status', 'active')
+            ->where('end_date', '>', now())
+            ->exists();
+    }
+
+    // Obtenir l'abonnement actif
+    public function activeSubscription()
+    {
+        return $this->subscriptions()
+            ->where('status', 'active')
+            ->where('end_date', '>', now())
+            ->first();
     }
 }

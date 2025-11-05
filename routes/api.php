@@ -21,6 +21,8 @@ use App\Http\Controllers\Admin\SupportController;
 use App\Http\Controllers\Admin\ModuleController;
 use App\Http\Controllers\Admin\CoursesController;
 use App\Http\Controllers\Admin\WorkshopController;
+use App\Http\Controllers\transaction\CinetPayWebhookController;
+use App\Http\Controllers\transaction\SubscriptionController;
 use Illuminate\Support\Facades\Route;
 
 // Route::get('/user', function (Request $request) {
@@ -40,6 +42,13 @@ Route::controller(LoginController::class)->group(function () {
     Route::post('/reset-password', [LoginController::class, 'resetPassword']);
 });
 
+Route::prefix('webhooks/cinetpay')->group(function () {
+    Route::post('notify', [CinetPayWebhookController::class, 'notify'])
+        ->name('cinetpay.notify');  // ✅ AJOUTER CECI
+
+    Route::get('return', [CinetPayWebhookController::class, 'return'])
+        ->name('cinetpay.return');  // ✅ AJOUTER CECI
+});
 Route::middleware('auth:sanctum')->group(function () {
 
 
@@ -188,4 +197,19 @@ Route::middleware('auth:sanctum')->group(function () {
         });
 
     Route::post('/logout', [ProfileController::class, 'logout']);
+
+
+    // Plans d'abonnement
+    Route::get('subscription-plans', [SubscriptionController::class, 'plans']);
+    Route::get('subscription-plans/{plan}', [SubscriptionController::class, 'showPlan']);
+
+    // Abonnements
+    Route::prefix('subscriptions')->group(function () {
+        Route::get('/', [SubscriptionController::class, 'index']);
+        Route::post('/', [SubscriptionController::class, 'store']);
+        Route::get('active', [SubscriptionController::class, 'active']);
+        Route::get('{subscription}', [SubscriptionController::class, 'show']);
+        Route::get('{subscription}/status', [SubscriptionController::class, 'checkStatus']);
+        Route::delete('{subscription}', [SubscriptionController::class, 'destroy']);
+    });
 });

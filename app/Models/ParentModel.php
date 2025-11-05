@@ -45,4 +45,33 @@ class ParentModel extends Model
     {
         return $this->hasMany(Student::class);
     }
+
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
+    // Obtenir l'abonnement actif
+    public function activeSubscription()
+    {
+        return $this->subscriptions()
+            ->active()
+            ->first();
+    }
+
+    // Vérifier si a un abonnement actif
+    public function hasActiveSubscription(): bool
+    {
+        return $this->subscriptions()
+            ->active()
+            ->exists();
+    }
+
+    // Obtenir les students par age_group
+    public function studentsByAgeGroup(string $ageGroup)
+    {
+        return $this->students()
+            ->where('age_group', $ageGroup)
+            ->get();
+    }
 }

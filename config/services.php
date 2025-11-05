@@ -62,4 +62,10 @@ return [
         'whatsapp_sender' => env('INFOBIP_WHATSAPP_SENDER'),
     ],
 
+    'cinetpay' => [
+    'api_key' => env('CINETPAY_API_KEY'),
+    'site_id' => env('CINETPAY_SITE_ID'),
+    'api_url' => env('CINETPAY_API_URL', 'https://api-checkout.cinetpay.com/v2/payment'),
+],
+
 ];
