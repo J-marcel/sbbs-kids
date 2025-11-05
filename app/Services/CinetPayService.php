@@ -29,11 +29,19 @@ class CinetPayService
     public function initiatePayment(array $data): array
     {
         try {
+            // ✅ S'assurer que le montant est un entier
+            $amount = (int) $data['amount'];
+
+            // ✅ Vérifier le montant minimum
+            if ($amount < 100) {
+                throw new Exception("Le montant doit être au moins 100 XOF (reçu: {$amount})");
+            }
+
             $payload = [
                 'apikey' => $this->apiKey,
                 'site_id' => $this->siteId,
                 'transaction_id' => $data['transaction_id'],
-                'amount' => (int) $data['amount'], // Convertir en entier
+                'amount' => $amount, // ✅ Utiliser la variable vérifiée
                 'currency' => 'XOF',
                 'description' => $data['description'],
                 'customer_name' => $data['customer_name'] ?? '',
@@ -53,11 +61,12 @@ class CinetPayService
                     : json_encode($data['metadata'] ?? []),
             ];
 
-            // ✅ Logger la requête complète
             Log::info('CinetPay Request', [
                 'url' => $this->apiUrl,
+                'amount_original' => $data['amount'],
+                'amount_converted' => $amount,
                 'payload' => array_merge($payload, [
-                    'apikey' => '***HIDDEN***' // Ne pas logger la clé API
+                    'apikey' => '***HIDDEN***'
                 ])
             ]);
 
@@ -105,7 +114,6 @@ class CinetPayService
             ]);
 
             throw new Exception('Erreur HTTP ' . $response->status() . ' : ' . $response->body());
-
         } catch (Exception $e) {
             Log::error('CinetPay Exception', [
                 'message' => $e->getMessage(),
@@ -150,7 +158,6 @@ class CinetPayService
             }
 
             throw new Exception('Erreur lors de la vérification du paiement : ' . $response->body());
-
         } catch (Exception $e) {
             Log::error('CinetPay Check Status Error', [
                 'message' => $e->getMessage()
