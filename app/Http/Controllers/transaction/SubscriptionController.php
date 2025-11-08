@@ -153,13 +153,32 @@ class SubscriptionController extends Controller
             ], 422);
         }
 
-        // Vérifier s'il y a déjà un abonnement actif
-        $activeSubscription = $parent->subscriptions()->active()->first();
+        // ✅ MODIFICATION ICI : Vérifier par groupe d'âge uniquement
+        $activeSubscription = $parent->subscriptions()
+            ->active()
+            ->whereHas('plan', function ($query) use ($plan) {
+                $query->where('age_group', $plan->age_group);
+            })
+            ->first();
+
         if ($activeSubscription) {
             return response()->json([
                 'success' => false,
-                'message' => 'Vous avez déjà un abonnement actif',
+                'message' => "Vous avez déjà un abonnement actif pour le groupe d'âge {$plan->age_group}",
                 'data' => new SubscriptionResource($activeSubscription->load(['plan', 'students'])),
+            ], 422);
+        }
+
+        // ✅ AJOUT : Vérifier que les élèves n'ont pas déjà un abonnement actif
+        $studentsWithActiveSubscription = $students->filter(function ($student) {
+            return $student->hasActiveSubscription();
+        });
+
+        if ($studentsWithActiveSubscription->count() > 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Certains élèves ont déjà un abonnement actif',
+                'students' => $studentsWithActiveSubscription->pluck('name'),
             ], 422);
         }
 
@@ -227,7 +246,6 @@ class SubscriptionController extends Controller
                     'payment_token' => $paymentResult['payment_token'],
                 ],
             ], 201);
-
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
