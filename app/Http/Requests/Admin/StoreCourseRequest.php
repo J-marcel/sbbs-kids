@@ -34,7 +34,7 @@ class StoreCourseRequest extends FormRequest
 
               // Champs des supports (tableau)
             'supports' => 'required|array|min:1',
-            'supports.*.type' => 'required|in:video,audio,text',
+            'supports.*.type' => 'required|in:video,pdf,audio,text',
             'supports.*.libelle' => 'required|string|max:255',
             'supports.*.pdf' => 'nullable|file|mimes:pdf|max:2048',
             'supports.*.video' => 'nullable|url|active_url',
@@ -80,7 +80,7 @@ class StoreCourseRequest extends FormRequest
             'supports.*.video.active_url' => 'L\'URL de la vidéo est invalide',
             'supports.*.description.string' => 'La description doit être une chaîne de caractères',
             'supports.*.type.required' => 'Le type est obligatoire',
-            'supports.*.type.in' => 'Le type doit être une valeur parmi video, audio, text',
+            'supports.*.type.in' => 'Le type doit être une valeur parmi video ,pdf, audio, text',
 
             // Messages pour les activités
             'activities.required' => 'Au moins une activité est obligatoire',
