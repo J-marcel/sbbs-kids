@@ -6,7 +6,7 @@ use App\Helpers\ImageHelpers;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Hash;
 
 class Student extends Model
@@ -61,13 +61,14 @@ class Student extends Model
     }
 
 
-    public function subscriptions(): BelongsToMany
+     // ✅ Changer de BelongsToMany à HasMany
+    public function subscriptions(): HasMany
     {
-        return $this->belongsToMany(Subscription::class, 'student_subscription')
-            ->withTimestamps();
+        return $this->hasMany(Subscription::class);
     }
 
-    // Vérifier si l'élève a un abonnement actif
+
+     // Vérifier si l'élève a un abonnement actif
     public function hasActiveSubscription(): bool
     {
         return $this->subscriptions()

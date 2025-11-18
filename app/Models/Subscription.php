@@ -5,7 +5,6 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Subscription extends Model
@@ -13,9 +12,11 @@ class Subscription extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'parent_model_id',  // ✅ Changé de user_id
+        'parent_model_id',
+        'student_id', // ✅ AJOUT
         'subscription_plan_id',
         'transaction_id',
+        'payment_group_id', // ✅ AJOUT
         'status',
         'start_date',
         'end_date',
@@ -36,15 +37,14 @@ class Subscription extends Model
         return $this->belongsTo(ParentModel::class, 'parent_model_id');
     }
 
+    public function student(): BelongsTo
+    {
+        return $this->belongsTo(Student::class);
+    }
+
     public function plan(): BelongsTo
     {
         return $this->belongsTo(SubscriptionPlan::class, 'subscription_plan_id');
-    }
-
-    public function students(): BelongsToMany
-    {
-        return $this->belongsToMany(Student::class, 'student_subscription')
-            ->withTimestamps();
     }
 
     // Vérifier si l'abonnement est actif
@@ -55,19 +55,14 @@ class Subscription extends Model
             && $this->end_date->isFuture();
     }
 
-    // Activer l'abonnement et attacher les students
-    public function activate(array $studentIds = []): void
+    // Activer l'abonnement
+    public function activate(): void
     {
         $this->update([
             'status' => 'active',
             'start_date' => now(),
             'end_date' => now()->addMonths($this->plan->duration_months),
         ]);
-
-        // Attacher les students sélectionnés
-        if (!empty($studentIds)) {
-            $this->students()->sync($studentIds);
-        }
     }
 
     // Scope pour les abonnements actifs
@@ -75,5 +70,11 @@ class Subscription extends Model
     {
         return $query->where('status', 'active')
                     ->where('end_date', '>', now());
+    }
+
+    // Scope pour regrouper par paiement
+    public function scopeByPaymentGroup($query, string $paymentGroupId)
+    {
+        return $query->where('payment_group_id', $paymentGroupId);
     }
 }

@@ -25,7 +25,9 @@ class CinetPayWebhookController extends Controller
         Log::info('CinetPay Notification', $request->all());
 
         try {
-            $transactionId = $request->input('cpm_trans_id');
+            $transactionId = $request->input('cpm_trans_id')
+                ?? $request->input('transaction_id')
+                ?? null;
 
             if (!$transactionId) {
                 return response()->json([
@@ -34,27 +36,21 @@ class CinetPayWebhookController extends Controller
                 ], 400);
             }
 
-            // Vérifier le statut auprès de CinetPay
             $status = $this->cinetPay->checkTransactionStatus($transactionId);
 
-            Log::info('CinetPay Status Check', [
-                'transaction_id' => $transactionId,
-                'status' => $status
-            ]);
-
-            // Si le paiement est validé
             if ($status['code'] === '00') {
-                $subscription = Subscription::where('transaction_id', $transactionId)->first();
+                // ✅ Activer TOUS les abonnements avec ce transaction_id
+                $subscriptions = Subscription::where('transaction_id', $transactionId)
+                    ->where('status', 'pending')
+                    ->get();
 
-                if ($subscription && $subscription->status === 'pending') {
-                    // Récupérer les student_ids depuis cinetpay_data
-                    $studentIds = $subscription->cinetpay_data['student_ids'] ?? [];
-                    $subscription->activate($studentIds);
+                foreach ($subscriptions as $subscription) {
+                    $subscription->activate();
 
                     Log::info('Subscription Activated', [
                         'subscription_id' => $subscription->id,
-                        'transaction_id' => $transactionId,
-                        'students_count' => count($studentIds)
+                        'student_id' => $subscription->student_id,
+                        'transaction_id' => $transactionId
                     ]);
                 }
             }
@@ -63,11 +59,9 @@ class CinetPayWebhookController extends Controller
                 'status' => 'success',
                 'message' => 'Notification traitée'
             ]);
-
         } catch (\Exception $e) {
             Log::error('CinetPay Notification Error', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'error' => $e->getMessage()
             ]);
 
             return response()->json([

@@ -13,7 +13,8 @@ class Support extends Model
         'pdf',
         'video',
         'description',
-        'course_id'
+        'course_id',
+        'status'
     ];
 
     protected $appends = [

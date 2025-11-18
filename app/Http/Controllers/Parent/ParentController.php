@@ -50,7 +50,6 @@ class ParentController extends Controller
             'name.string' => 'Le nom de l\'étudiant doit être une chaîne de caractères.',
             'name.max' => 'Le nom de l\'étudiant ne doit pas dépasser 255 caractères.',
 
-
             'gender.required' => 'Le genre de l\'étudiant est requis.',
             'gender.in' => 'Le genre de l\'étudiant doit être "male" ou "female".',
 
@@ -74,6 +73,26 @@ class ParentController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
+        // Vérifier que l'âge correspond à la tranche d'âge
+        $ageGroupRanges = [
+            '4-7' => ['min' => 4, 'max' => 7],
+            '8-12' => ['min' => 8, 'max' => 12],
+            '13-17' => ['min' => 13, 'max' => 17],
+        ];
+
+        $selectedAgeGroup = $request->age_group;
+        $age = $request->age;
+
+        if ($age < $ageGroupRanges[$selectedAgeGroup]['min'] || $age > $ageGroupRanges[$selectedAgeGroup]['max']) {
+            return response()->json([
+                'message' => "L'âge $age ne correspond pas à la tranche d'âge $selectedAgeGroup",
+                'errors' => [
+                    'age' => ["L'âge doit être compris entre {$ageGroupRanges[$selectedAgeGroup]['min']} et {$ageGroupRanges[$selectedAgeGroup]['max']} pour la tranche d'âge $selectedAgeGroup"]
+                ],
+                'status' => 422,
+            ], 422);
+        }
+
         DB::beginTransaction();
 
         try {
@@ -89,7 +108,6 @@ class ParentController extends Controller
                 ], 404);
             }
 
-
             // Création de l'étudiant
             $student = Student::create([
                 'parent_model_id' => $mainParent->id,
@@ -100,7 +118,7 @@ class ParentController extends Controller
                 'avatar_id' => $request->avatar_id,
                 'pin_code' => Hash::make($request->pin_code),
                 'role_id' => 4,
-                ]);
+            ]);
 
             DB::commit();
 
@@ -118,6 +136,102 @@ class ParentController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Mettre à jour un étudiant
+     */
+    public function updateStudent(Request $request, $studentId)
+    {
+        // Récupérer le parent principal
+        $mainParent = ParentModel::where('user_id', $request->user()->id)
+            ->where('is_main', true)
+            ->first();
+
+        if (!$mainParent) {
+            return response()->json([
+                'message' => 'Parent principal non trouvé',
+                'status' => 404,
+            ], 404);
+        }
+
+        // Récupérer l'étudiant
+        $student = Student::where('id', $studentId)
+            ->where('parent_model_id', $mainParent->id)
+            ->first();
+
+        if (!$student) {
+            return response()->json([
+                'message' => 'Étudiant non trouvé',
+                'status' => 404,
+            ], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'sometimes|required|string|max:255',
+            'gender' => 'sometimes|required|in:male,female',
+            'age_group' => 'sometimes|required|in:4-7,8-12,13-17',
+            'age' => 'sometimes|required|integer|min:4|max:17',
+            'avatar_id' => 'sometimes|required|exists:avatars,id',
+            'pin_code' => 'sometimes|required|string|min:4|max:4',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        // Vérifier que l'âge correspond à la tranche d'âge si les deux sont modifiés
+        if ($request->has('age_group') || $request->has('age')) {
+            $ageGroupRanges = [
+                '4-7' => ['min' => 4, 'max' => 7],
+                '8-12' => ['min' => 8, 'max' => 12],
+                '13-17' => ['min' => 13, 'max' => 17],
+            ];
+
+            $selectedAgeGroup = $request->age_group ?? $student->age_group;
+            $age = $request->age ?? $student->age;
+
+            if ($age < $ageGroupRanges[$selectedAgeGroup]['min'] || $age > $ageGroupRanges[$selectedAgeGroup]['max']) {
+                return response()->json([
+                    'message' => "L'âge $age ne correspond pas à la tranche d'âge $selectedAgeGroup",
+                    'errors' => [
+                        'age' => ["L'âge doit être compris entre {$ageGroupRanges[$selectedAgeGroup]['min']} et {$ageGroupRanges[$selectedAgeGroup]['max']} pour la tranche d'âge $selectedAgeGroup"]
+                    ],
+                    'status' => 422,
+                ], 422);
+            }
+        }
+
+        DB::beginTransaction();
+
+        try {
+            // Mise à jour des données de base
+            $student->fill($request->only(['name', 'gender', 'age_group', 'age', 'avatar_id']));
+
+            // Mise à jour du PIN si fourni
+            if ($request->has('pin_code')) {
+                $student->pin_code = Hash::make($request->pin_code);
+            }
+
+            $student->save();
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Étudiant mis à jour avec succès',
+                'student' => $student->load('avatar'),
+                'status' => 200,
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Erreur lors de la mise à jour',
+                'error' => $e->getMessage(),
+                'status' => 500,
+            ], 500);
+        }
+    }
+
+    // ... Le reste des méthodes reste inchangé ...
 
     /**
      * Afficher les étudiants du parent connecté
@@ -207,81 +321,6 @@ class ParentController extends Controller
             'status' => 200,
         ], 200);
     }
-
-    /**
-     * Mettre à jour un étudiant
-     */
-    public function updateStudent(Request $request, $studentId)
-    {
-        // Récupérer le parent principal
-        $mainParent = ParentModel::where('user_id', $request->user()->id)
-            ->where('is_main', true)
-            ->first();
-
-        if (!$mainParent) {
-            return response()->json([
-                'message' => 'Parent principal non trouvé',
-                'status' => 404,
-            ], 404);
-        }
-
-        // Récupérer l'étudiant
-        $student = Student::where('id', $studentId)
-            ->where('parent_model_id', $mainParent->id)
-            ->first();
-
-        if (!$student) {
-            return response()->json([
-                'message' => 'Étudiant non trouvé',
-                'status' => 404,
-            ], 404);
-        }
-
-        $validator = Validator::make($request->all(), [
-            'name' => 'sometimes|required|string|max:255',
-            'gender' => 'sometimes|required|in:male,female',
-            'age_group' => 'sometimes|required|in:4-7,8-12,13-17',
-            'age' => 'sometimes|required|integer|min:4|max:17',
-            'avatar_id' => 'sometimes|required|exists:avatars,id',
-            'pin_code' => 'sometimes|required|string|min:4|max:4',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
-        }
-
-        DB::beginTransaction();
-
-        try {
-
-
-            // Mise à jour des données de base
-            $student->fill($request->only(['name', 'gender', 'age_group', 'age', 'avatar_id']));
-
-            // Mise à jour du PIN si fourni
-            if ($request->has('pin_code')) {
-                $student->pin_code = Hash::make($request->pin_code);
-            }
-
-            $student->save();
-
-            DB::commit();
-
-            return response()->json([
-                'message' => 'Étudiant mis à jour avec succès',
-                'student' => $student->load('avatar'),
-                'status' => 200,
-            ], 200);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json([
-                'message' => 'Erreur lors de la mise à jour',
-                'error' => $e->getMessage(),
-                'status' => 500,
-            ], 500);
-        }
-    }
-
 
     /**
      * Modifier le PIN d'un étudiant

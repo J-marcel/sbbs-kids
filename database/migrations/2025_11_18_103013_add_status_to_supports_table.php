@@ -12,8 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('supports', function (Blueprint $table) {
-            $table->enum('type', ['video', 'support
-            ', 'text'])->default('text')->nullable();
+            $table->enum('status', ['pending', 'in_progress', 'active', 'completed'])
+                  ->default('pending')
+                  ->after('libelle');
         });
     }
 
@@ -23,7 +24,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('supports', function (Blueprint $table) {
-            $table->dropColumn('type');
+             $table->dropColumn('status');
         });
     }
 };

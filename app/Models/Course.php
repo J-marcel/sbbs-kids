@@ -17,6 +17,7 @@ class Course extends Model
         'level_id',
         'module_id',
         'admin_id',
+        'status'
     ];
 
     // protected $appends = [
