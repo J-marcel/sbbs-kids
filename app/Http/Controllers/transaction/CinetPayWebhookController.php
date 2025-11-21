@@ -5,6 +5,7 @@ namespace App\Http\Controllers\transaction;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\SubscriptionResource;
 use App\Models\Subscription;
+use App\Models\WorkshopPurchase;
 use App\Services\CinetPayService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -20,56 +21,70 @@ class CinetPayWebhookController extends Controller
      * Notification de paiement CinetPay
      * POST /api/webhooks/cinetpay/notify
      */
-    public function notify(Request $request): JsonResponse
-    {
-        Log::info('CinetPay Notification', $request->all());
+   public function notify(Request $request): JsonResponse
+{
+    Log::info('CinetPay Notification', $request->all());
 
-        try {
-            $transactionId = $request->input('cpm_trans_id')
-                ?? $request->input('transaction_id')
-                ?? null;
+    try {
+        $transactionId = $request->input('cpm_trans_id')
+            ?? $request->input('transaction_id')
+            ?? null;
 
-            if (!$transactionId) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Transaction ID manquant'
-                ], 400);
-            }
+        if (!$transactionId) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Transaction ID manquant'
+            ], 400);
+        }
 
-            $status = $this->cinetPay->checkTransactionStatus($transactionId);
+        $status = $this->cinetPay->checkTransactionStatus($transactionId);
 
-            if ($status['code'] === '00') {
-                // ✅ Activer TOUS les abonnements avec ce transaction_id
+        if ($status['code'] === '00') {
+            // ✅ Vérifier si c'est un abonnement ou un achat de workshop
+            if (str_starts_with($transactionId, 'WRK-')) {
+                // Achat de workshop
+                $purchases = WorkshopPurchase::where('transaction_id', $transactionId)
+                    ->where('status', 'pending')
+                    ->get();
+
+                foreach ($purchases as $purchase) {
+                    $purchase->complete();
+
+                    Log::info('Workshop Purchase Completed', [
+                        'purchase_id' => $purchase->id,
+                        'student_id' => $purchase->student_id,
+                        'workshop_id' => $purchase->workshop_id,
+                        'transaction_id' => $transactionId
+                    ]);
+                }
+            } else {
+                // Abonnement (code existant)
                 $subscriptions = Subscription::where('transaction_id', $transactionId)
                     ->where('status', 'pending')
                     ->get();
 
                 foreach ($subscriptions as $subscription) {
                     $subscription->activate();
-
-                    Log::info('Subscription Activated', [
-                        'subscription_id' => $subscription->id,
-                        'student_id' => $subscription->student_id,
-                        'transaction_id' => $transactionId
-                    ]);
                 }
             }
-
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Notification traitée'
-            ]);
-        } catch (\Exception $e) {
-            Log::error('CinetPay Notification Error', [
-                'error' => $e->getMessage()
-            ]);
-
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Erreur lors du traitement'
-            ], 500);
         }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Notification traitée'
+        ]);
+
+    } catch (\Exception $e) {
+        Log::error('CinetPay Notification Error', [
+            'error' => $e->getMessage()
+        ]);
+
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Erreur lors du traitement'
+        ], 500);
     }
+}
 
     public function return(Request $request): JsonResponse
     {

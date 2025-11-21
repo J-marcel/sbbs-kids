@@ -74,4 +74,9 @@ class ParentModel extends Model
             ->where('age_group', $ageGroup)
             ->get();
     }
+
+    public function workshopPurchases(): HasMany
+    {
+        return $this->hasMany(WorkshopPurchase::class);
+    }
 }

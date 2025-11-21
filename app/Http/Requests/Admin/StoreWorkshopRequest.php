@@ -24,6 +24,7 @@ class StoreWorkshopRequest extends FormRequest
         return [
             'title' => 'required|string|max:255',
             'educational_objective' => 'required|string|max:255',
+            'price' => 'required|numeric',
             'required_equipment' => 'required|string',
             'activity_schedule' => 'required|string',
 
@@ -38,6 +39,8 @@ class StoreWorkshopRequest extends FormRequest
             'title.max' => 'Le titre doit contenir au maximum 255 caractères.',
             'educational_objective.required' => 'L\'objectif éducatif est obligatoire.',
             'educational_objective.string' => 'L\'objectif éducatif doit être une chaîne de caractères.',
+            'price.required' => 'Le prix est obligatoire.',
+            'price.numeric' => 'Le prix doit être un nombre.',
             'required_equipment.required' => 'L\'équipement requis est obligatoire.',
             'required_equipment.string' => 'L\'équipement requis doit être une chaîne de caractères.',
             'activity_schedule.required' => 'Le calendrier des activités est obligatoire.',
