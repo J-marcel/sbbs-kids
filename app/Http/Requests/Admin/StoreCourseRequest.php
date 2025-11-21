@@ -47,6 +47,15 @@ class StoreCourseRequest extends FormRequest
                 $index = explode('.', $attribute)[1];
                 $type = request()->input("supports.{$index}.type");
 
+              // Champs des supports (tableau)
+            'supports' => 'required|array|min:1',
+            'supports.*.type' => 'required|in:video,pdf,audio,text',
+            'supports.*.libelle' => 'required|string|max:255',
+            'supports.*.pdf' => 'nullable|file|mimes:pdf|max:2048',
+            'supports.*.video' => 'nullable|url|active_url',
+            'supports.*.description' => 'nullable|string',
+
+
                 // Le PDF est requis seulement si type = 'support'
                 if ($type === 'support' && !$value) {
                     $fail('Le fichier PDF est obligatoire pour un support de type "support".');
@@ -106,7 +115,11 @@ class StoreCourseRequest extends FormRequest
             'supports.*.video.active_url' => 'L\'URL de la vidéo est invalide',
             'supports.*.description.string' => 'La description doit être une chaîne de caractères',
             'supports.*.type.required' => 'Le type est obligatoire',
+<<<<<<< HEAD
             'supports.*.type.in' => 'Le type doit être une valeur parmi video, support, text',
+=======
+            'supports.*.type.in' => 'Le type doit être une valeur parmi video ,pdf, audio, text',
+>>>>>>> 57695c6f52b7a78282a77d41f37ae8ffdb5f1df9
 
             // Messages pour les activités
             'activities.required' => 'Au moins une activité est obligatoire',
