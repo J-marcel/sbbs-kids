@@ -37,6 +37,7 @@ class WorkshopController extends Controller
             $workshop = Workshop::create([
                 'title' => $request->title,
                 'educational_objective' => $request->educational_objective,
+                'price' => $request->price,
                 'required_equipment' => $request->required_equipment,
                 'activity_schedule' => $request->activity_schedule,
                 'course_id' => $request->course_id,
@@ -85,6 +86,7 @@ class WorkshopController extends Controller
             $workshop->update([
                 'title' => $request->title ?? $workshop->title,
                 'educational_objective' => $request->educational_objective ?? $workshop->educational_objective,
+                'price' => $request->price ?? $workshop->price,
                 'required_equipment' => $request->required_equipment ?? $workshop->required_equipment,
                 'activity_schedule' => $request->activity_schedule ?? $workshop->activity_schedule,
                 'course_id' => $request->course_id ?? $workshop->course_id,

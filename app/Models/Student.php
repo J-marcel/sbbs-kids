@@ -61,14 +61,14 @@ class Student extends Model
     }
 
 
-     // ✅ Changer de BelongsToMany à HasMany
+    // ✅ Changer de BelongsToMany à HasMany
     public function subscriptions(): HasMany
     {
         return $this->hasMany(Subscription::class);
     }
 
 
-     // Vérifier si l'élève a un abonnement actif
+    // Vérifier si l'élève a un abonnement actif
     public function hasActiveSubscription(): bool
     {
         return $this->subscriptions()
@@ -84,5 +84,29 @@ class Student extends Model
             ->where('status', 'active')
             ->where('end_date', '>', now())
             ->first();
+    }
+
+
+    public function workshopPurchases(): HasMany
+    {
+        return $this->hasMany(WorkshopPurchase::class);
+    }
+
+    // Vérifier si le student a acheté un workshop
+    public function hasPurchasedWorkshop(Workshop $workshop): bool
+    {
+        return $this->workshopPurchases()
+            ->where('workshop_id', $workshop->id)
+            ->where('status', 'completed')
+            ->exists();
+    }
+
+    // Obtenir tous les workshops achetés
+    public function purchasedWorkshops()
+    {
+        return $this->belongsToMany(Workshop::class, 'workshop_purchases')
+            ->wherePivot('status', 'completed')
+            ->withPivot(['amount_paid', 'purchased_at', 'status'])
+            ->withTimestamps();
     }
 }

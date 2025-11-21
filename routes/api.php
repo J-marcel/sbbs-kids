@@ -21,6 +21,7 @@ use App\Http\Controllers\Admin\SupportController;
 use App\Http\Controllers\Admin\ModuleController;
 use App\Http\Controllers\Admin\CoursesController;
 use App\Http\Controllers\Admin\WorkshopController;
+use App\Http\Controllers\transaction\WorkshopPurchaseController;
 use App\Http\Controllers\transaction\CinetPayWebhookController;
 use App\Http\Controllers\transaction\SubscriptionController;
 use Illuminate\Support\Facades\Route;
@@ -205,11 +206,34 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Abonnements
     Route::prefix('subscriptions')->group(function () {
+        Route::get('by-age-group', [SubscriptionController::class, 'plansByAgeGroup']);
+        Route::get('recommended', [SubscriptionController::class, 'recommendedPlans']);
+        Route::get('popular', [SubscriptionController::class, 'popularPlans']);
+        Route::get('statistics', [SubscriptionController::class, 'planStatistics']);
         Route::get('/', [SubscriptionController::class, 'index']);
         Route::post('/', [SubscriptionController::class, 'store']);
         Route::get('active', [SubscriptionController::class, 'active']);
         Route::get('{subscription}', [SubscriptionController::class, 'show']);
         Route::get('{subscription}/status', [SubscriptionController::class, 'checkStatus']);
         Route::delete('{subscription}', [SubscriptionController::class, 'destroy']);
+
+
+    });
+
+
+    // Routes publiques - workshops
+    Route::prefix('workshops')->group(function () {
+        Route::get('/', [WorkshopPurchaseController::class, 'workshops']);
+        Route::get('{workshop}', [WorkshopPurchaseController::class, 'showWorkshop']);
+    });
+
+
+
+    // Achats de workshops
+    Route::prefix('workshop-purchases')->group(function () {
+        Route::get('/', [WorkshopPurchaseController::class, 'index']);
+        Route::post('/', [WorkshopPurchaseController::class, 'store']);
+        Route::get('{purchase}', [WorkshopPurchaseController::class, 'show']);
+        Route::get('{purchase}/status', [WorkshopPurchaseController::class, 'checkStatus']);
     });
 });
