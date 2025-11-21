@@ -37,7 +37,6 @@ class StoreCourseRequest extends FormRequest
         'supports.*.libelle' => 'required|string|max:255',
         'supports.*.description' => 'nullable|string',
 
-<<<<<<< HEAD
         // Validation conditionnelle selon le type
         'supports.*.pdf' => [
             'nullable',
@@ -47,15 +46,6 @@ class StoreCourseRequest extends FormRequest
             function ($attribute, $value, $fail) {
                 $index = explode('.', $attribute)[1];
                 $type = request()->input("supports.{$index}.type");
-=======
-              // Champs des supports (tableau)
-            'supports' => 'required|array|min:1',
-            'supports.*.type' => 'required|in:video,pdf,audio,text',
-            'supports.*.libelle' => 'required|string|max:255',
-            'supports.*.pdf' => 'nullable|file|mimes:pdf|max:2048',
-            'supports.*.video' => 'nullable|url|active_url',
-            'supports.*.description' => 'nullable|string',
->>>>>>> 57695c6f52b7a78282a77d41f37ae8ffdb5f1df9
 
                 // Le PDF est requis seulement si type = 'support'
                 if ($type === 'support' && !$value) {
@@ -117,7 +107,11 @@ class StoreCourseRequest extends FormRequest
             'supports.*.description.string' => 'La description doit être une chaîne de caractères',
             'supports.*.type.required' => 'Le type est obligatoire',
 <<<<<<< HEAD
+<<<<<<< HEAD
             'supports.*.type.in' => 'Le type doit être une valeur parmi video, support, text',
+=======
+            'supports.*.type.in' => 'Le type doit être une valeur parmi video ,pdf, audio, text',
+>>>>>>> 57695c6f52b7a78282a77d41f37ae8ffdb5f1df9
 =======
             'supports.*.type.in' => 'Le type doit être une valeur parmi video ,pdf, audio, text',
 >>>>>>> 57695c6f52b7a78282a77d41f37ae8ffdb5f1df9
