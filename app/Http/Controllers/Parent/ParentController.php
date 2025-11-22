@@ -17,20 +17,36 @@ class ParentController extends Controller
     use FileHandler;
 
     /**
-     * Afficher la liste des parents principaux avec leurs étudiants
+     * Afficher la liste des étudiants avec informations d'abonnement
      */
     public function index(): JsonResponse
     {
-        $students = Student::with('avatar')
-        ->latest()
-        ->get();
+        // ✅ Charger les relations pour les infos d'abonnement
+        $students = Student::with([
+            'avatar',
+            'subscriptions' => function ($query) {
+                $query->where('status', 'active')
+                    ->where('end_date', '>', now())
+                    ->with('plan');
+            }
+        ])
+            ->latest()
+            ->get();
+
+        // ✅ Statistiques globales
+        $statistics = [
+            'total' => $students->count(),
+            'with_active_subscription' => $students->filter(fn($s) => $s->has_active_subscription)->count(),
+            'without_subscription' => $students->filter(fn($s) => !$s->has_active_subscription)->count(),
+            'expiring_soon' => $students->filter(fn($s) => $s->subscriptionExpiringSoon())->count(),
+        ];
 
         return response()->json([
             'students' => $students,
+            'statistics' => $statistics,
             'status' => 200,
         ], 200);
     }
-
 
     /**
      * Créer un nouveau student pour le parent connecté
@@ -120,11 +136,26 @@ class ParentController extends Controller
                 'role_id' => 4,
             ]);
 
+            // ✅ Charger les relations pour les infos d'abonnement
+            $student->load([
+                'avatar',
+                'subscriptions' => function ($query) {
+                    $query->where('status', 'active')
+                        ->where('end_date', '>', now())
+                        ->with('plan');
+                }
+            ]);
+
             DB::commit();
 
             return response()->json([
                 'message' => 'Étudiant créé avec succès',
-                'student' => $student->load('avatar'),
+                'student' => $student,
+                'subscription_info' => [
+                    'has_active_subscription' => $student->has_active_subscription,
+                    'needs_subscription' => !$student->has_active_subscription,
+                    'recommended_plans_for_age_group' => $student->age_group,
+                ],
                 'status' => 200,
             ], 200);
         } catch (\Exception $e) {
@@ -214,11 +245,21 @@ class ParentController extends Controller
 
             $student->save();
 
+            // ✅ Charger les relations pour les infos d'abonnement
+            $student->load([
+                'avatar',
+                'subscriptions' => function ($query) {
+                    $query->where('status', 'active')
+                        ->where('end_date', '>', now())
+                        ->with('plan');
+                }
+            ]);
+
             DB::commit();
 
             return response()->json([
                 'message' => 'Étudiant mis à jour avec succès',
-                'student' => $student->load('avatar'),
+                'student' => $student,
                 'status' => 200,
             ], 200);
         } catch (\Exception $e) {
@@ -231,16 +272,13 @@ class ParentController extends Controller
         }
     }
 
-    // ... Le reste des méthodes reste inchangé ...
-
     /**
-     * Afficher les étudiants du parent connecté
+     * Afficher les étudiants du parent connecté avec infos d'abonnement
      */
     public function getMyStudents(Request $request)
     {
         $mainParent = ParentModel::where('user_id', $request->user()->id)
             ->where('is_main', true)
-            ->with('students')
             ->first();
 
         if (!$mainParent) {
@@ -250,9 +288,58 @@ class ParentController extends Controller
             ], 404);
         }
 
+        // ✅ Charger les students avec leurs abonnements actifs
+        $students = Student::where('parent_model_id', $mainParent->id)
+            ->with([
+                'avatar',
+                'subscriptions' => function ($query) {
+                    $query->where('status', 'active')
+                        ->where('end_date', '>', now())
+                        ->with('plan');
+                }
+            ])
+            ->get();
+
+        // ✅ Grouper les students par statut d'abonnement
+        $studentsWithSubscription = $students->filter(fn($s) => $s->has_active_subscription);
+        $studentsWithoutSubscription = $students->filter(fn($s) => !$s->has_active_subscription);
+        $studentsExpiringSoon = $students->filter(fn($s) => $s->subscriptionExpiringSoon());
+
+        // ✅ Statistiques détaillées
+        $statistics = [
+            'total_students' => $students->count(),
+            'with_active_subscription' => $studentsWithSubscription->count(),
+            'without_subscription' => $studentsWithoutSubscription->count(),
+            'expiring_soon' => $studentsExpiringSoon->count(),
+            'by_age_group' => [
+                '4-7' => [
+                    'total' => $students->where('age_group', '4-7')->count(),
+                    'with_subscription' => $studentsWithSubscription->where('age_group', '4-7')->count(),
+                ],
+                '8-12' => [
+                    'total' => $students->where('age_group', '8-12')->count(),
+                    'with_subscription' => $studentsWithSubscription->where('age_group', '8-12')->count(),
+                ],
+                '13-17' => [
+                    'total' => $students->where('age_group', '13-17')->count(),
+                    'with_subscription' => $studentsWithSubscription->where('age_group', '13-17')->count(),
+                ],
+            ],
+        ];
+
         return response()->json([
-            'parent' => $mainParent,
-            // 'students' => $mainParent->students,
+            'parent' => [
+                'id' => $mainParent->id,
+                'name' => $mainParent->name,
+                'email' => $mainParent->email,
+            ],
+            'students' => $students,
+            'grouped_students' => [
+                'with_subscription' => $studentsWithSubscription->values(),
+                'without_subscription' => $studentsWithoutSubscription->values(),
+                'expiring_soon' => $studentsExpiringSoon->values(),
+            ],
+            'statistics' => $statistics,
             'status' => 200,
         ], 200);
     }
@@ -277,7 +364,15 @@ class ParentController extends Controller
         // Récupérer l'étudiant qui appartient à ce parent
         $student = Student::where('id', $studentId)
             ->where('parent_model_id', $mainParent->id)
-            ->with(['avatar', 'role:id,name'])
+            ->with([
+                'avatar',
+                'role:id,name',
+                'subscriptions' => function ($query) {
+                    $query->where('status', 'active')
+                        ->where('end_date', '>', now())
+                        ->with('plan');
+                }
+            ])
             ->first();
 
         if (!$student) {
@@ -285,6 +380,21 @@ class ParentController extends Controller
                 'message' => 'Étudiant non trouvé ou non autorisé',
                 'status' => 404,
             ], 404);
+        }
+
+        // ✅ Vérifier si le student a un abonnement actif
+        if (!$student->has_active_subscription) {
+            return response()->json([
+                'message' => 'Cet étudiant n\'a pas d\'abonnement actif',
+                'student' => [
+                    'id' => $student->id,
+                    'name' => $student->name,
+                    'age_group' => $student->age_group,
+                ],
+                'subscription_status' => $student->subscription_status,
+                'action_required' => 'Veuillez souscrire à un abonnement pour accéder au profil de cet étudiant',
+                'status' => 403,
+            ], 403);
         }
 
         // Validation du PIN
@@ -315,8 +425,11 @@ class ParentController extends Controller
         return response()->json([
             'message' => 'Connexion réussie au profil étudiant',
             'token_type' => 'Bearer',
-            'student' => $student->load('avatar'),
-            'parent' => $mainParent,
+            'student' => $student,
+            'parent' => [
+                'id' => $mainParent->id,
+                'name' => $mainParent->name,
+            ],
             'access_token' => $token,
             'status' => 200,
         ], 200);
