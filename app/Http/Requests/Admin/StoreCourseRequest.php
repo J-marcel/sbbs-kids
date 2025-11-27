@@ -19,7 +19,7 @@ class StoreCourseRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-   public function rules(): array
+public function rules(): array
 {
     return [
         'title' => ['required', 'string', 'max:255'],
@@ -37,30 +37,23 @@ class StoreCourseRequest extends FormRequest
         'supports.*.libelle' => 'required|string|max:255',
         'supports.*.description' => 'nullable|string',
 
-        // Validation conditionnelle selon le type
+        // Validation conditionnelle pour le PDF
         'supports.*.pdf' => [
             'nullable',
             'file',
             'mimes:pdf',
-            'max:10240', // 10 MB
+            'max:10240',
             function ($attribute, $value, $fail) {
                 $index = explode('.', $attribute)[1];
                 $type = request()->input("supports.{$index}.type");
 
-              // Champs des supports (tableau)
-            'supports' => 'required|array|min:1',
-            'supports.*.type' => 'required|in:video,pdf,audio,text',
-            'supports.*.libelle' => 'required|string|max:255',
-            'supports.*.pdf' => 'nullable|file|mimes:pdf|max:2048',
-            'supports.*.video' => 'nullable|url|active_url',
-            'supports.*.description' => 'nullable|string',
-
-                // Le PDF est requis seulement si type = 'support'
                 if ($type === 'support' && !$value) {
                     $fail('Le fichier PDF est obligatoire pour un support de type "support".');
                 }
             },
         ],
+
+        // Validation conditionnelle pour la vidéo
         'supports.*.video' => [
             'nullable',
             'url',
@@ -68,7 +61,6 @@ class StoreCourseRequest extends FormRequest
                 $index = explode('.', $attribute)[1];
                 $type = request()->input("supports.{$index}.type");
 
-                // La vidéo est requise seulement si type = 'video'
                 if ($type === 'video' && !$value) {
                     $fail('L\'URL de la vidéo est obligatoire pour un support de type "video".');
                 }
@@ -114,21 +106,14 @@ class StoreCourseRequest extends FormRequest
             'supports.*.video.active_url' => 'L\'URL de la vidéo est invalide',
             'supports.*.description.string' => 'La description doit être une chaîne de caractères',
             'supports.*.type.required' => 'Le type est obligatoire',
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> 302fde8b7e5c8aff0797f10b0c70a8716e54b7c4
+
             'supports.*.type.in' => 'Le type doit être une valeur parmi video, support, text',
-=======
+
             'supports.*.type.in' => 'Le type doit être une valeur parmi video ,pdf, audio, text',
->>>>>>> 57695c6f52b7a78282a77d41f37ae8ffdb5f1df9
-<<<<<<< HEAD
-=======
-=======
+
+
             'supports.*.type.in' => 'Le type doit être une valeur parmi video ,pdf, audio, text',
->>>>>>> 57695c6f52b7a78282a77d41f37ae8ffdb5f1df9
->>>>>>> 302fde8b7e5c8aff0797f10b0c70a8716e54b7c4
+
 
             // Messages pour les activités
             'activities.required' => 'Au moins une activité est obligatoire',
